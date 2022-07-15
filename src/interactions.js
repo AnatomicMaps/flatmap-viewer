@@ -681,36 +681,37 @@ export class UserInteractions
         return false;
     }
 
+    __resetFeatureDisplay()
+    //=====================
+    {
+        // Remove any existing tooltip
+        this.removeTooltip_();
+
+        // Reset cursor
+        this._map.getCanvas().style.cursor = 'default';
+
+        // Reset any active features
+        this.resetActiveFeatures_();
+    }
+
     mouseMoveEvent_(event)
     //====================
     {
         // No tooltip when context menu is open
-
         if (this._modal) {
             return;
         }
 
-        // Remove any existing tooltip
-
-        this.removeTooltip_();
-
-        // Reset cursor
-
-        this._map.getCanvas().style.cursor = 'default';
-
-        // Reset any active features
-
-        this.resetActiveFeatures_();
+        // Remove tooltip, reset active features, etc
+        this.__resetFeatureDisplay();
 
         // Reset any info display
-
         const displayInfo = (this._infoControl && this._infoControl.active);
         if (displayInfo) {
             this._infoControl.reset()
         }
 
         // Get all the features at the current point
-
         const features = this._map.queryRenderedFeatures(event.point);
         if (features.length === 0) {
             this._lastFeatureMouseEntered = null;
@@ -872,7 +873,13 @@ export class UserInteractions
         this.clearActiveMarker_();
         const feature = this._activeFeatures[0]
         this.selectionEvent_(event.originalEvent, feature);
-        if (feature !== undefined) {
+        if (this._modal) {
+           // Remove tooltip, reset active features, etc
+            this.__resetFeatureDisplay();
+            this.__unselectFeatures();
+            this.__clearModal();
+        } else if (feature !== undefined) {
+            this.__lastClickLngLat = event.lngLat;
             this.__featureEvent('click', feature);
         }
     }
