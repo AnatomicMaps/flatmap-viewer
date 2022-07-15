@@ -205,7 +205,7 @@ export class UserInteractions
         // Display a context menu on right-click
 
         this._lastContextTime = 0;
-        this._contextMenu = new ContextMenu(flatmap, this.clearModal_.bind(this));
+        this._contextMenu = new ContextMenu(flatmap, this.__clearModal.bind(this));
         this._map.on('contextmenu', this.contextMenuEvent_.bind(this));
 
         // Display a context menu with a touch longer than 0.5 second
@@ -330,8 +330,8 @@ export class UserInteractions
         }
     }
 
-    unselectFeatures_()
-    //=================
+    __unselectFeatures()
+    //==================
     {
         for (const featureId of this._selectedFeatureIds.keys()) {
             const feature = this.mapFeature_(featureId);
@@ -447,8 +447,8 @@ export class UserInteractions
         this._modal = true;
     }
 
-    clearModal_(event)
-    //================
+    __clearModal(event)
+    //=================
     {
         this._modal = false;
     }
@@ -459,7 +459,7 @@ export class UserInteractions
         this._contextMenu.hide();
         const nodeId = event.target.getAttribute('featureId');
         this.enablePathFeatures_(enable, this._pathways.pathFeatureIds(nodeId));
-        this.clearModal_();
+        this.__clearModal();
     }
 
     enablePathFeatures_(enable, featureIds)
@@ -490,9 +490,9 @@ export class UserInteractions
     reset()
     //=====
     {
-        this.clearModal_();
+        this.__clearModal();
         this.clearActiveMarker_();
-        this.unselectFeatures_();
+        this.__unselectFeatures();
         this.enablePathFeatures_(true, this._pathways.allFeatureIds());
         this._disabledPathFeatures = false;
     }
@@ -500,7 +500,7 @@ export class UserInteractions
     clearSearchResults(reset=true)
     //============================
     {
-        this.unselectFeatures_();
+        this.__unselectFeatures();
     }
 
     /**
@@ -536,7 +536,7 @@ export class UserInteractions
     //========================
     {
         if (featureIds.length) {
-            this.unselectFeatures_();
+            this.__unselectFeatures();
             for (const featureId of featureIds) {
                 const annotation = this._flatmap.annotation(featureId);
                 if (annotation) {
@@ -569,7 +569,7 @@ export class UserInteractions
         const padding = options.padding || 100;
         if (featureIds.length) {
             this.unhighlightFeatures_();
-            if (select) this.unselectFeatures_();
+            if (select) this.__unselectFeatures();
             let bbox = null;
             for (const featureId of featureIds) {
                 const annotation = this._flatmap.annotation(featureId);
@@ -616,7 +616,7 @@ export class UserInteractions
 
             // Highlight the feature
 
-            this.unselectFeatures_();
+            this.__unselectFeatures();
             this.selectFeature_(featureId);
 
             // Find the pop-up's postion
@@ -638,7 +638,7 @@ export class UserInteractions
             }
             this.setModal_();
             this._currentPopup = new maplibre.Popup(options).addTo(this._map);
-            this._currentPopup.on('close', this.clearModal_.bind(this));
+            this._currentPopup.on('close', this.__clearModal.bind(this));
             this._currentPopup.setLngLat(location);
             if (typeof content === 'object') {
                 this._currentPopup.setDOMContent(content);
@@ -839,7 +839,7 @@ export class UserInteractions
     {
         const multipleSelect = event.ctrlKey || event.metaKey;
         if (!multipleSelect) {
-            this.unselectFeatures_();
+            this.__unselectFeatures();
         }
         if (feature !== undefined) {
             const featureId = feature.id;
