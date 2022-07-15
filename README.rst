@@ -11,14 +11,14 @@ Standalone Use
 Requirements
 ------------
 
-* `nodejs <https://nodejs.org/en/download/>`_
+*   `nodejs <https://nodejs.org/en/download/>`_
 
 
 Installation
 ------------
 
-1) Clone this repository.
-2) Run ``npm install``
+1)  Clone this repository.
+2)  Run ``npm install``
 
 
 Running
@@ -38,7 +38,10 @@ The map server endpoint is specified as ``MAP_ENDPOINT`` in ``src/main.js``. It 
 Package Installation
 ====================
 
-* ``npm install @abi-software/flatmap-viewer@2.2.0-beta.15``
+::
+
+    $ npm install @abi-software/flatmap-viewer@2.2.0-beta.16
+
 
 Documentation
 -------------
