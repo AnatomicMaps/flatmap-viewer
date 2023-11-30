@@ -108,6 +108,7 @@ export class UserInteractions
 
         this._inQuery = false;
         this._modal = false;
+        this._highlightOnMouseOver = false;
 
         // Default colour settings
 
@@ -495,6 +496,12 @@ export class UserInteractions
         }
     }
 
+    setHighlightOnMouseOver(flag)
+    //============================
+    {
+        this._highlightOnMouseOver = flag;
+    }
+
     highlightFeature_(featureId)
     //==========================
     {
@@ -847,19 +854,21 @@ export class UserInteractions
 
         // Simulate `mouseenter` events on features
 
-        const feature = features[0];
-        const featureModels = ('properties' in feature && 'models' in feature.properties)
-                            ? feature.properties.models
-                            : null;
-        if (this._lastFeatureMouseEntered !== feature.id
-         && (this._lastFeatureModelsMouse === null
-          || this._lastFeatureModelsMouse !== featureModels)) {
-            if (this.__featureEvent('mouseenter', feature)) {
-                this._lastFeatureMouseEntered = feature.id;
-                this._lastFeatureModelsMouse = featureModels;
-            } else {
-                this._lastFeatureMouseEntered = null;
-                this._lastFeatureModelsMouse = null;
+        if (this._highlightOnMouseOver) {
+            const feature = features[0];
+            const featureModels = ('properties' in feature && 'models' in feature.properties)
+                                ? feature.properties.models
+                                : null;
+            if (this._lastFeatureMouseEntered !== feature.id
+            && (this._lastFeatureModelsMouse === null
+            || this._lastFeatureModelsMouse !== featureModels)) {
+                if (this.__featureEvent('mouseenter', feature)) {
+                    this._lastFeatureMouseEntered = feature.id;
+                    this._lastFeatureModelsMouse = featureModels;
+                } else {
+                    this._lastFeatureMouseEntered = null;
+                    this._lastFeatureModelsMouse = null;
+                }
             }
         }
 

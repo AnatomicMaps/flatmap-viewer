@@ -1138,6 +1138,21 @@ class FlatMap
     }
 
     /**
+     * Set flag for if the hover event for features triggers
+     *
+     * @param {boolean}   flag   If ``true`` the hover event for features triggers, 
+     *                           showing the feature's label and highlighting it.
+     */
+        setHighlighOnMouseOver(flag=true)
+        //===============================
+        {
+            if (this._userInteractions !== null) {
+                this._userInteractions.setHighlighOnMouseOver(flag);
+            }
+        }
+    
+
+    /**
      * Generate callbacks as a result of panning/zooming the map.
      *
      * @param {boolean}   enabled  Generate callbacks when ``true``,
