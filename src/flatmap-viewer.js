@@ -293,6 +293,21 @@ class FlatMap
             this._userInteractions.enableSckanPaths(sckanState, enable);
         }
     }
+ 
+    /**
+     * Hide or show all paths in SCKAN with complete nodes and not.
+     *
+     * @param {string}   completenessState  Either ``valid`` or ``invalid``
+     * @param {boolean}  enable  Show or hide paths with completeness state.
+     *                           Defaults to ``true`` (show)
+     */
+    enableCompletenessPath(completenessState, enable=true)
+    //======================================
+    {
+        if (this._userInteractions !== null) {
+            this._userInteractions.enableCompletenessPaths(completenessState, enable);
+        }
+    }
 
     /**
      * Show or hide connectivity features observed in particular species.

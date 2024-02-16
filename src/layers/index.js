@@ -251,7 +251,8 @@ export class LayerManager
         this.__layerOptions = utils.setDefaults(flatmap.options.layerOptions, {
             colour: true,
             outline: true,
-            sckan: 'valid'
+            sckan: 'valid',
+            completeness: 'all'
         });
         const backgroundLayer = new style.BackgroundLayer();
         if ('background' in flatmap.options) {
@@ -360,6 +361,31 @@ export class LayerManager
         }
         if (newState !== this.__layerOptions.sckan) {
             this.setFilter({sckan: newState});
+        }
+    }
+
+    enableCompletenessPaths(completenessState, enable=true)
+    //=======================================
+    {
+        const currentState = this.__layerOptions.completeness;
+        const validEnabled = ['valid', 'all'].includes(currentState);
+        const invalidEnabled = ['invalid', 'all'].includes(currentState);
+        let newState = completenessState.toLowerCase();
+        if (newState === 'valid') {
+            if (enable && !validEnabled) {
+                newState = invalidEnabled ? 'all' : 'valid';
+            } else if (!enable && validEnabled) {
+                newState = invalidEnabled ? 'invalid' : 'none';
+            }
+        } else if (newState === 'invalid') {
+            if (enable && !invalidEnabled) {
+                newState = validEnabled ? 'all' : 'invalid';
+            } else if (!enable && invalidEnabled) {
+                newState = validEnabled ? 'valid' : 'none';
+            }
+        }
+        if (newState !== this.__layerOptions.completeness) {
+            this.setFilter({completeness: newState});
         }
     }
 }

@@ -388,6 +388,36 @@ function sckanFilter(options)
     return sckanFilter;
 }
 
+function completenessFilter(options)
+{
+    const completenessState = !'completeness' in options ? 'all'
+                     : options.completeness.toLowerCase();
+    const completenessFilter =
+        completenessState == 'none' ? [
+            ['!', ['has', 'completeness']]
+        ] :
+        completenessState == 'valid' ? [[
+            'any',
+            ['!', ['has', 'completeness']],
+            [
+                'all',
+                ['has', 'completeness'],
+                ['==', ['get', 'completeness'], true]
+            ]
+        ]] :
+        completenessState == 'invalid' ? [[
+            'any',
+            ['!', ['has', 'completeness']],
+            [
+                'all',
+                ['has', 'completeness'],
+                ['!=', ['get', 'completeness'], true]
+            ]
+        ]] :
+        [ ];
+    return completenessFilter;
+}
+
 //==============================================================================
 
 export class AnnotatedPathLayer extends VectorStyleLayer
@@ -401,7 +431,8 @@ export class AnnotatedPathLayer extends VectorStyleLayer
     {
         return [
             'all',
-            ...sckanFilter(options)
+            ...sckanFilter(options),
+            ...completenessFilter(options)
         ];
     }
 
@@ -486,12 +517,14 @@ export class PathLineLayer extends VectorStyleLayer
                 taxonFilter.push(false);
             }
         }
+        const completeness_filter = completenessFilter(options);
 
         return this.__dashed ? [
             'all',
             ['==', ['get', 'type'], 'line-dash'],
             ...sckan_filter,
-            ...taxonFilter
+            ...taxonFilter,
+            ...completeness_filter
         ] : [
             'all',
             [
@@ -501,7 +534,8 @@ export class PathLineLayer extends VectorStyleLayer
                     'all',
                     ['==', ['get', 'type'], 'line'],
                     ...sckan_filter,
-                    ...taxonFilter
+                    ...taxonFilter,
+                    ...completeness_filter
                 ]
             ]
         ];

@@ -41,7 +41,7 @@ import {SystemsManager} from './systems';
 
 import {displayedProperties, InfoControl} from './controls/info';
 import {AnnotatorControl, BackgroundControl, LayerControl, NerveControl,
-        SCKANControl} from './controls/controls';
+        SCKANControl, CompletenessControl} from './controls/controls';
 import {AnnotationDrawControl, DRAW_ANNOTATION_LAYERS} from './controls/annotation'
 import {PathControl} from './controls/paths';
 import {Path3DControl} from './controls/paths3d'
@@ -246,6 +246,7 @@ export class UserInteractions
                 // SCKAN path and SYSTEMS controls for FC maps
                 this._map.addControl(new SystemsControl(flatmap, this.__systemsManager.systems));
                 this._map.addControl(new SCKANControl(flatmap, flatmap.options.layerOptions));
+                this._map.addControl(new CompletenessControl(flatmap, flatmap.options.layerOptions));
             } else {
                 // Connectivity taxon control for AC maps
                 this._map.addControl(new TaxonsControl(flatmap));
@@ -1239,6 +1240,12 @@ export class UserInteractions
     //=======================================
     {
         this._layerManager.enableSckanPaths(sckanState, enable);
+    }
+
+    enableCompletenessPaths(completenessState, enable=true)
+    //=======================================
+    {
+        this._layerManager.enableCompletenessPaths(completenessState, enable);
     }
 
     enableConnectivityByTaxonIds(taxonIds, enable=true)

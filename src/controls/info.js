@@ -30,7 +30,8 @@ export const displayedProperties = [
     'fc-kind',
     'name',
     ...indexedProperties,
-    'featureId'
+    'featureId',
+    'missing-nodes'
 ];
 
 //==============================================================================

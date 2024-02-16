@@ -643,3 +643,136 @@ export class BackgroundControl
 }
 
 //==============================================================================
+
+const COMPLETENESS_STATES = [
+    {
+        'id': 'VALID',
+        'description': 'Path with complete nodes'
+    },
+    {
+        'id': 'INVALID',
+        'description': 'Path with missing node/s'
+    }
+];
+
+
+export class CompletenessControl
+{
+    constructor(flatmap, options={completeness: 'all'})
+    {
+        this.__flatmap = flatmap;
+        this.__map = undefined;
+        this.__initialState = options.completeness || 'valid';
+    }
+
+    getDefaultPosition()
+    //==================
+    {
+        return 'top-right';
+    }
+
+    onAdd(map)
+    //========
+    {
+        this.__map = map;
+        this.__container = document.createElement('div');
+        this.__container.className = 'maplibregl-ctrl flatmap-control';
+        this.__completeness = document.createElement('div');
+        this.__completeness.className = 'flatmap-control-grid';
+
+        const innerHTML = [];
+        let checked = (this.__initialState === 'all') ? 'checked' : '';
+        innerHTML.push(`<label for="completeness-all-paths">ALL PATHS:</label><input id="completeness-all-paths" type="checkbox" ${checked}/>`);
+        for (const state of COMPLETENESS_STATES) {
+            checked = (this.__initialState.toUpperCase() === state.id || this.__initialState === 'all') ? 'checked' : '';
+            innerHTML.push(`<label for="completeness-${state.id}">${state.description}</label><input id="completeness-${state.id}" type="checkbox" ${checked}/>`);
+        }
+        this.__completeness.innerHTML = innerHTML.join('\n');
+
+        this.__completenessCount = COMPLETENESS_STATES.length;
+        this.__checkedCount = (this.__initialState === 'all') ? this.__completenessCount
+                            : (this.__initialState === 'none') ? 0
+                            : 1;
+        this.__halfCount = Math.trunc(this.__completenessCount/2);
+
+        this.__button = document.createElement('button');
+        this.__button.id = 'map-completeness-button';
+        this.__button.className = 'control-button text-button';
+        this.__button.setAttribute('type', 'button');
+        this.__button.setAttribute('aria-label', 'Show/hide complete SCKAN paths');
+        this.__button.setAttribute('control-visible', 'false');
+        this.__button.textContent = 'MISSING';
+        this.__button.title = 'Show/hide incomplete SCKAN paths';
+        this.__container.appendChild(this.__button);
+
+        this.__container.addEventListener('click', this.onClick_.bind(this));
+        return this.__container;
+    }
+
+    onRemove()
+    //========
+    {
+        this.__container.parentNode.removeChild(this.__container);
+        this.__map = undefined;
+    }
+
+    onClick_(event)
+    //=============
+    {
+        if (event.target.id === 'map-completeness-button') {
+            if (this.__button.getAttribute('control-visible') === 'false') {
+                this.__container.appendChild(this.__completeness);
+                this.__button.setAttribute('control-visible', 'true');
+                const allLayersCheckbox = document.getElementById('completeness-all-paths');
+                allLayersCheckbox.indeterminate = (this.__checkedCount > 0)
+                                               && (this.__checkedCount < this.__completenessCount);
+                this.__completeness.focus();
+            } else {
+                this.__completeness = this.__container.removeChild(this.__completeness);
+                this.__button.setAttribute('control-visible', 'false');
+            }
+        } else if (event.target.tagName === 'INPUT') {
+            if (event.target.id === 'completeness-all-paths') {
+                if (event.target.indeterminate) {
+                    event.target.checked = (this.__checkedCount >= this.__halfCount);
+                    event.target.indeterminate = false;
+                }
+                if (event.target.checked) {
+                    this.__state = 'all';
+                    this.__checkedCount = this.__completenessCount;
+                } else {
+                    this.__state = 'none';
+                    this.__checkedCount = 0;
+                }
+                for (const state of COMPLETENESS_STATES) {
+                    const completenessCheckbox = document.getElementById(`completeness-${state.id}`);
+                    if (completenessCheckbox) {
+                        completenessCheckbox.checked = event.target.checked;
+                        this.__flatmap.enableCompletenessPath(state.id, event.target.checked);
+                    }
+                }
+            } else if (event.target.id.startsWith('completeness-')) {
+                const completenessId = event.target.id.substring(13);
+                this.__flatmap.enableCompletenessPath(completenessId, event.target.checked);
+                if (event.target.checked) {
+                    this.__checkedCount += 1;
+                } else {
+                    this.__checkedCount -= 1;
+                }
+                const allLayersCheckbox = document.getElementById('completeness-all-paths');
+                if (this.__checkedCount === 0) {
+                    allLayersCheckbox.checked = false;
+                    allLayersCheckbox.indeterminate = false;
+                } else if (this.__checkedCount === this.__completenessCount) {
+                    allLayersCheckbox.checked = true;
+                    allLayersCheckbox.indeterminate = false;
+                } else {
+                    allLayersCheckbox.indeterminate = true;
+                }
+            }
+        }
+        event.stopPropagation();
+    }
+}
+
+//==============================================================================
