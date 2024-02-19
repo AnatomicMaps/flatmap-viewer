@@ -246,11 +246,11 @@ export class UserInteractions
                 // SCKAN path and SYSTEMS controls for FC maps
                 this._map.addControl(new SystemsControl(flatmap, this.__systemsManager.systems));
                 this._map.addControl(new SCKANControl(flatmap, flatmap.options.layerOptions));
-                this._map.addControl(new CompletenessControl(flatmap, flatmap.options.layerOptions));
             } else {
                 // Connectivity taxon control for AC maps
                 this._map.addControl(new TaxonsControl(flatmap));
             }
+            this._map.addControl(new CompletenessControl(flatmap, flatmap.options.layerOptions));
 
             this._map.addControl(new Path3DControl(this));
 
