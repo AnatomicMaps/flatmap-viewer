@@ -31,7 +31,8 @@ export const displayedProperties = [
     'name',
     ...indexedProperties,
     'featureId',
-    'missing-nodes'
+    'missing-nodes',
+    'alert'
 ];
 
 //==============================================================================
