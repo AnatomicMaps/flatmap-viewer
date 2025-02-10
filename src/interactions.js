@@ -823,6 +823,7 @@ export class UserInteractions
      * @param      {Array.<string>}  featureIds   An array of feature identifiers
      * @param      {Object}  [options]
      * @param      {boolean} [options.zoomIn=false]  Zoom in the map (always zoom out as necessary)
+     * @param      {boolean} [options.sequence=false] Select features in chunks (optional for large sets of features)
      */
     zoomToFeatures(featureIds, options=null)
     //======================================
