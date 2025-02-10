@@ -814,7 +814,7 @@ export class UserInteractions
     //===========================
     {
         this.unselectFeatures();
-        this.zoomToFeatures(featureIds, {noZoomIn: true});
+        this.zoomToFeatures(featureIds);
     }
 
     /**
