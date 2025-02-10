@@ -828,11 +828,12 @@ export class UserInteractions
     //======================================
     {
         options = utils.setDefaults(options, {
-            zoomIn: false
+            zoomIn: false,
+            sequence: false
         });
         if (featureIds.length) {
-            this.unselectFeatures();
-            let bbox = null;
+            if (!options.sequence) this.unselectFeatures();
+            let bbox = null || options.bbox;
             if (!options.zoomIn) {
                 const bounds = this._map.getBounds().toArray();
                 bbox = [...bounds[0], ...bounds[1]];
@@ -858,6 +859,7 @@ export class UserInteractions
                     padding: 0,
                     animate: false
                 })
+                return bbox
             }
         }
     }

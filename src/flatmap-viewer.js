@@ -1675,7 +1675,7 @@ export class FlatMap
         });
         if (this._userInteractions !== null) {
             const featureIds = this.modelFeatureIdList(externalIds);
-            this._userInteractions.zoomToFeatures(featureIds, options);
+            return this._userInteractions.zoomToFeatures(featureIds, options);
         }
     }
 
@@ -1721,7 +1721,7 @@ export class FlatMap
             padding:100
         })
         if (this._userInteractions !== null) {
-            this._userInteractions.zoomToFeatures(geojsonIds, options)
+            return this._userInteractions.zoomToFeatures(geojsonIds, options)
         }
     }
 
