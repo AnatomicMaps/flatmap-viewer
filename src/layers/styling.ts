@@ -330,7 +330,7 @@ export class FeatureFillLayer extends VectorStyleLayer
 
     paintStyle(options: StylingOptions, changes=false)
     {
-        const coloured = options.coloured || true
+        const coloured = !('coloured' in options) || options.coloured
         const dimmed = options.dimmed || false
         const functional = (options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL)
         const paintStyle: PaintSpecification = {
@@ -397,8 +397,8 @@ export class FeatureBorderLayer extends VectorStyleLayer
 
     paintStyle(options: StylingOptions, changes=false)
     {
-        const coloured = options.coloured || true
-        const outlined = options.outlined || true
+        const coloured = !('coloured' in options) || options.coloured
+        const outlined = !('outlined' in options) || options.outlined
         const dimmed = options.dimmed || false
         const activeRasterLayer = options.activeRasterLayer || false
         const functional = (options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL)
@@ -490,7 +490,7 @@ export class FeatureLineLayer extends VectorStyleLayer
 
     paintStyle(options: StylingOptions, changes=false)
     {
-        const coloured = options.coloured || true
+        const coloured = !('coloured' in options) || options.coloured
         const paintStyle: PaintSpecification = {
             'line-color': [
                 'case',
@@ -1323,7 +1323,7 @@ export class RasterStyleLayer extends StyleLayer
 
     style(layer: FlatMapLayer, options: StylingOptions): RasterLayerSpecification
     {
-        const coloured = options.coloured || true
+        const coloured = !('coloured' in options) || options.coloured
         const style: RasterLayerSpecification = {
             ...super.style(layer),
             source: this.id,

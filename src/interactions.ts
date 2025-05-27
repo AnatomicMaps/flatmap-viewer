@@ -200,7 +200,7 @@ export class UserInteractions
         this.#map = flatmap.map!
 
         // Default colour settings
-        this.#colourOptions = {colour: true, outline: true}
+        this.#colourOptions = {coloured: true, outlined: true}
 
         // Track enabled features
 

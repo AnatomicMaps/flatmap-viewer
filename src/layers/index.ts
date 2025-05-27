@@ -368,7 +368,7 @@ class FlatMapStylingLayer
     #setPaintRasterLayers(options)
     //============================
     {
-        const coloured = !('colour' in options) || options.colour
+        const coloured = !('coloured' in options) || options.coloured
         for (const layer of this.#rasterStyleLayers) {
             // Check active status when resetting to visible....
             this.#map.setLayoutProperty(layer.id, 'visibility',

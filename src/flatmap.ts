@@ -1182,8 +1182,8 @@ export class FlatMap
     //==================
     {
         options = utils.setDefaults(options, {
-            colour: true,
-            outline: true
+            coloured: true,
+            outlined: true
         })
         if (this.#userInteractions !== null) {
             this.#userInteractions.setPaint(options)
