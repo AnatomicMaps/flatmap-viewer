@@ -101,6 +101,7 @@ export class ClusteredAnatomicalMarkerLayer
     #map: MapLibreMap
     #mapTermGraph: MapTermGraph
     #markerTerms: Map<string, Set<string>> = new Map()
+    #markerTermsByZoomTerm: Map<string, Set<string>[]> = new Map()
     #multiScaleByZoomTerm: Map<string, boolean[]> = new Map()
     #maxZoom: number
     #points: GeoJSON.FeatureCollection = {
@@ -150,7 +151,8 @@ export class ClusteredAnatomicalMarkerLayer
     markerTerms(term: string): DatasetMarkerResult[]
     //==============================================
     {
-        const terms = [...(this.#markerTerms.get(term) || []).values()]
+        const zoomLevel = Math.floor(this.#map.getZoom())
+        const terms = [...(this.#markerTermsByZoomTerm.get(term)[zoomLevel] || []).values()]
         return terms.map(term => {
             let label: string = term
             const termFeatures = this.#flatmap.modelFeatureIds(term)
@@ -230,23 +232,39 @@ export class ClusteredAnatomicalMarkerLayer
                 for (const cluster of clusteredSet.clusters) {
                     let zoomDatasets = this.#datasetsByZoomTerm.get(cluster.term)
                     let zoomMultiscale = this.#multiScaleByZoomTerm.get(cluster.term)
+                    let zoomMarkerTerms = this.#markerTermsByZoomTerm.get(cluster.term)
                     if (!zoomDatasets) {
                         zoomDatasets = []
                         zoomMultiscale = []
+                        zoomMarkerTerms = []
                         for (let n = 0; n <= MAX_MARKER_ZOOM; n +=1) {
                             zoomDatasets.push(new Set<string>())
                             zoomMultiscale.push(false)
+                            zoomMarkerTerms.push(new Set<string>())
                         }
                         this.#datasetsByZoomTerm.set(cluster.term, zoomDatasets)
                         this.#multiScaleByZoomTerm.set(cluster.term, zoomMultiscale)
+                        this.#markerTermsByZoomTerm.set(cluster.term, zoomMarkerTerms)
                     }
                     for (let zoom = cluster.minZoom; zoom < cluster.maxZoom; zoom += 1) {
                         zoomDatasets[zoom].add(cluster.datasetId)
                         zoomMultiscale![zoom] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
+                        const descendents = clusteredSet.descendents.get(cluster.term)
+                        if (descendents) {                            
+                            for (const descendent of descendents.values()) {
+                                zoomMarkerTerms[zoom].add(descendent)
+                            }
+                        }
                     }
                     if (cluster.maxZoom === MAX_MARKER_ZOOM) {
                         zoomDatasets[MAX_MARKER_ZOOM].add(cluster.datasetId)
                         zoomMultiscale![MAX_MARKER_ZOOM] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
+                        const descendents = clusteredSet.descendents.get(cluster.term)
+                        if (descendents) {                            
+                            for (const descendent of descendents.values()) {
+                                zoomMarkerTerms[MAX_MARKER_ZOOM].add(descendent)
+                            }
+                        }
                         let datasetFeatureIds = this.#datasetFeatureIds.get(cluster.datasetId)
                         if (!datasetFeatureIds) {
                             datasetFeatureIds = new Set()
