@@ -397,6 +397,7 @@ export type FlatMapMarkerOptions = maplibregl.MarkerOptions & {
 
 export type FlatMapPopUpOptions = maplibregl.PopupOptions & {
     annotationFeatureGeometry?: Point2D
+    annotationEvent?: AnnotationEvent
     positionAtLastClick?: boolean
     preserveSelection?: boolean
 }

@@ -985,7 +985,19 @@ export class UserInteractions
             this.#currentPopup = new maplibregl.Popup(options).addTo(this.#map)
             this.#currentPopup.on('close', this.#onCloseCurrentPopup.bind(this))
             if (drawn) {
-                this.#currentPopup.on('close', this.abortAnnotationEvent.bind(this))
+                // If annotationEvent is not provided, create a fallback with available geometry
+                const fallbackAnnotationEvent: AnnotationEvent = {
+                    type: 'created',
+                    feature: {
+                        id: featureId,
+                        geometry: {
+                            type: 'Point',
+                            coordinates: options.annotationFeatureGeometry!
+                        } as GeoJSON.Point,
+                    } as AnnotatedFeature
+                }
+                const annotationEvent: AnnotationEvent = options.annotationEvent || fallbackAnnotationEvent;
+                this.#currentPopup.on('close', () => this.abortAnnotationEvent(annotationEvent))
             }
             this.#currentPopup.setLngLat(location)
             if (typeof content === 'object') {
