@@ -1120,7 +1120,7 @@ export class NervePolygonFill extends VectorStyleLayer
                     ['==', ['get', 'kind'], 'bezier-end'], 'red',
                     ['==', ['get', 'kind'], 'bezier-control'], 'green',
                     // @ts-expect-error 2322
-                    ...PATH_STYLE_RULES, 'white'
+                    ...PATH_STYLE_RULES, '#A5F160'
                 ]
             ],
             'fill-opacity': [
@@ -1133,7 +1133,7 @@ export class NervePolygonFill extends VectorStyleLayer
                     ['==', ['get', 'type'], 'arrow'],
                     ['==', ['get', 'type'], 'junction']
                 ], dimmed ? 0.1 : 0.5,
-                0.01
+                1.0
             ]
         }
         return super.changedPaintStyle(paintStyle, changes)
