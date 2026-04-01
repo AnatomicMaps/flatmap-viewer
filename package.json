@@ -19,7 +19,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "vite serve app --port 3000",
-    "prepare": "tsc --p ./tsconfig-build.json && vite build",
+    "prepare": "bun tsc --p ./tsconfig-build.json && bun vite build",
     "preview": "vite preview",
     "build": "vite build app --base /viewer/",
     "build-docs": "npx typedoc",
