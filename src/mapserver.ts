@@ -46,6 +46,10 @@ type KnowledgeSourcesRecord = {
 
 //==============================================================================
 
+export const SERVER_FLATMAP_RESOURCE = 'flatmap/'
+
+//==============================================================================
+
 export class FlatMapServer
 {
     #url: string

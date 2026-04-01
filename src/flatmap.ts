@@ -59,7 +59,7 @@ import {FLATMAP_LEGEND} from './legend'
 import type {FlatmapLegendEntry} from './legend'
 import {UserInteractions} from './interactions'
 import {MapTermGraph} from './knowledge'
-import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
+import {KNOWLEDGE_SOURCE_SCHEMA, type FlatMapServer, SERVER_FLATMAP_RESOURCE} from './mapserver'
 import {loadMarkerIcons} from './markers'
 import {APINATOMY_PATH_PREFIX, type PathType} from './pathways'
 import {SearchIndex} from './search'
@@ -258,7 +258,7 @@ export class FlatMap
         this.#mapServer = mapServer
         this.#baseUrl = mapServer.url()
         this.#id = mapDescription.id
-        this.#url = `${this.#baseUrl}flatmap/${mapDescription.uuid}`
+        this.#url = `${this.#baseUrl}${SERVER_FLATMAP_RESOURCE}${mapDescription.uuid}`
         this.#uuid = mapDescription.uuid
         this.#details = mapDescription.details
         this.#mapMetadata = mapDescription.mapMetadata
@@ -760,8 +760,8 @@ export class FlatMap
         }
     }
 
-    makeServerUrl(url, resource='flatmap/'): string
-    //==============================================
+    makeServerUrl(url, resource=SERVER_FLATMAP_RESOURCE): string
+    //==========================================================
     {
         if (url.startsWith('http://') || url.startsWith('https://')) {
             return url
@@ -849,11 +849,7 @@ export class FlatMap
     get url()
     //========
     {
-        const url = this.makeServerUrl('')
-        if (url.endsWith('/')) {
-            return url.substring(0, url.length - 1)
-        }
-        return url
+        return this.#url
     }
 
     /**
