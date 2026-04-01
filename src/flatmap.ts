@@ -248,6 +248,7 @@ export class FlatMap
     #taxonNames = new Map()
     #taxonToFeatureIds: FeatureIdMap = new Map()
     #userInteractions: UserInteractions|null = null
+    #url: string
     #uuid: string
     #nerveToFeatureIds: Map<GeoJSONId, GeoJSONId[]> = new Map()
 
@@ -257,6 +258,7 @@ export class FlatMap
         this.#mapServer = mapServer
         this.#baseUrl = mapServer.url()
         this.#id = mapDescription.id
+        this.#url = `${this.#baseUrl}flatmap/${mapDescription.uuid}`
         this.#uuid = mapDescription.uuid
         this.#details = mapDescription.details
         this.#mapMetadata = mapDescription.mapMetadata
@@ -290,7 +292,7 @@ export class FlatMap
 
         if (mapDescription.mapKnowledge) {
             try {
-                this.#rdfStore.load('bttp://anatomic-maps.org/baseuri', mapDescription.mapKnowledge)   /// <<< URI
+                this.#rdfStore.load(this.#url, mapDescription.mapKnowledge)
             } catch(err) {
                 console.log(err, mapDescription.mapKnowledge)
             }
