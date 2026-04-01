@@ -193,7 +193,10 @@ export class FlatMapServer
             }
         })
         if (response.ok) {
-            return await response.text()
+            const contentType = response.headers.get('Content-Type')
+            if (contentType.includes('text/turtle')) {
+                return await response.text()
+            }
         }
     }
 
