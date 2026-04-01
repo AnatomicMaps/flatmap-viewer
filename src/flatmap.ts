@@ -1300,6 +1300,8 @@ export class FlatMap
     //=====
     {
         if (this.#map) {
+            // Set before calling `remove()` to avoid a race...
+            this.#contextLost = true
             this.#map.remove()
             this.#map = null
         }
