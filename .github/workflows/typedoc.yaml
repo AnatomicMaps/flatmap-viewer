@@ -14,23 +14,42 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Install git submodules
-        run: git submodule init
-      - run: git submodule update --recursive
-      - name: Install node
+      - name: Set the timezone to New Zealand
+        uses: szenius/set-timezone@v2.0
+        with:
+          timezoneLinux: 'Pacific/Auckland'
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Install Node.js
         uses: actions/setup-node@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4.1.0
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm
+        # Install the latest version of npm since we need npm 11.5.1 or later to publish to npm using OIDC (see
+        # https://docs.npmjs.com/trusted-publishers).
+        run: npm install -g npm@latest
+
+      - name: Install bun
+        run: npm install -g bun
+
       - name: Install packages
-        run: pnpm install
+        run: bun install
+
       - name: Generate documentation
-        run: pnpm build-docs
+        run: bun run build-docs
+
       - name: Upload generated documentation to Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs
+
   deploy:
     runs-on: ubuntu-latest
     environment:
