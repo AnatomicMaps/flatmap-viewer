@@ -299,12 +299,12 @@ export class MapViewer
                 }
             }
         } else {
-            mapLayers = (await this.#mapServer.mapLayers(mapId))!
+            mapLayers = (await this.#mapServer.mapLayers(mapId))
         }
 
         // Get the map's style file
 
-        const mapStyle: FlatMapStyleSpecification|null = (await this.#mapServer.mapStyle(mapId))!
+        const mapStyle: FlatMapStyleSpecification|null = (await this.#mapServer.mapStyle(mapId))
 
         // Make sure the style has glyphs defined
 
@@ -319,11 +319,11 @@ export class MapViewer
 
         // Get the map's annotations
 
-        const annotations = (await this.#mapServer.mapAnnotations(mapId))!
+        const annotations = (await this.#mapServer.mapAnnotations(mapId))
 
         // Get metadata about the map
 
-        const mapMetadata: FlatMapMetadata|null = (await this.#mapServer.mapMetadata(mapId))!
+        const mapMetadata: FlatMapMetadata|null = (await this.#mapServer.mapMetadata(mapId))
 
         // Get RDF knowledge for the map
 
