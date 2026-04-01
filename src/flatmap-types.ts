@@ -268,6 +268,7 @@ export interface FlatMapMetadata
     created: string
     creator: string
     describes: string
+    'exported-properties'?: string[],
     id: string
     'git-status'?: object
     legend?: FlatmapLegendEntry[]

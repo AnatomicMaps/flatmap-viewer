@@ -222,6 +222,7 @@ export class FlatMap
     #created: string
     #datasetToFeatureIds: FeatureIdMap = new Map()
     #details: FlatMapIndex
+    #exportedFeatureProperties: string[]
     #featurePropertyValues = new Map()
     #id: string
     #initialState: FlatMapState|null = null
@@ -293,6 +294,11 @@ export class FlatMap
             } catch(err) {
                 console.log(err, mapDescription.mapKnowledge)
             }
+        }
+
+        this.#exportedFeatureProperties = [...EXPORTED_FEATURE_PROPERTIES]
+        if ('exported-properties' in this.#mapMetadata) {
+            this.#exportedFeatureProperties.push(...this.#mapMetadata['exported-properties'])
         }
 
         // Set base of source URLs in map's style
@@ -1729,7 +1735,7 @@ export class FlatMap
     //========================================================================================
     {
         const data = {}
-        for (const property of EXPORTED_FEATURE_PROPERTIES) {
+        for (const property of this.#exportedFeatureProperties) {
             if (property in properties) {
                 const value = properties[property]
                 if (value) {
