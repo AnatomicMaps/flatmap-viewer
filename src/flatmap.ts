@@ -278,7 +278,7 @@ export class FlatMap
         } else if ('knowledge-source' in sckanProvenance) {
             this.#knowledgeSource = sckanProvenance['knowledge-source'] || ''
         } else if ('npo' in sckanProvenance) {
-            this.#knowledgeSource = `${sckanProvenance.npo!.release}-npo`     // NB. Drop `-npo` (server will need to check...) <<<<<<<<<
+            this.#knowledgeSource = `${sckanProvenance.npo.release}-npo`     // NB. Drop `-npo` (server will need to check...) <<<<<<<<<
         } else {
             this.#knowledgeSource = this.#mapServer.latestSource
         }
@@ -332,7 +332,7 @@ export class FlatMap
                 }
             }
             if (!found) {
-                mapDescription.options.images!.push(image)
+                mapDescription.options.images.push(image)
             }
         }
 
@@ -401,7 +401,7 @@ export class FlatMap
         }
 
         if ('maxZoom' in this.#options) {
-            mapOptions.maxZoom = this.#options.maxZoom! - 0.001
+            mapOptions.maxZoom = this.#options.maxZoom - 0.001
         }
         if ('minZoom' in this.#options) {
             mapOptions.minZoom = this.#options.minZoom
@@ -455,8 +455,8 @@ export class FlatMap
                 await this.#setupUserInteractions()
             } else if (this.#startupState === 1) {
                 this.#startupState = 2
-                this.#map!.setRenderWorldCopies(true)
-                this.#bounds = this.#map!.getBounds()
+                this.#map.setRenderWorldCopies(true)
+                this.#bounds = this.#map.getBounds()
                 if (this.#bounds.getEast() >= 180) {
                     this.#bounds.setNorthEast(new maplibregl.LngLat(179.9, this.#bounds.getNorth()))
                 }
@@ -469,14 +469,14 @@ export class FlatMap
                 this.#normalisedOrigin = [sw.x, ne.y]
                 this.#normalised_size = [ne.x - sw.x, sw.y - ne.y]
                 if ('state' in this.#options) {
-                    this.#userInteractions!.setState(this.#options.state)
+                    this.#userInteractions.setState(this.#options.state)
                 }
                 this.#initialState = this.getState()
-                if (this.#userInteractions!.minimap) {
-                    this.#userInteractions!.minimap.initialise(true)
+                if (this.#userInteractions.minimap) {
+                    this.#userInteractions.minimap.initialise(true)
                 }
-                this.#map!.setMaxBounds(this.#bounds)
-                this.#map!.fitBounds(this.#bounds, {animate: false})
+                this.#map.setMaxBounds(this.#bounds)
+                this.#map.fitBounds(this.#bounds, {animate: false})
                 this.#startupState = 3
 
 
@@ -516,12 +516,12 @@ export class FlatMap
         }
 
         // Load icons used for clustered markers
-        await loadMarkerIcons(this.#map!)
+        await loadMarkerIcons(this.#map)
 
         // Load anatomical term hierarchy for the flatmap, this is not required
         // again after it has been loaded once
         if (!this.#mapTermGraphLoaded) {
-          const termGraph = (await this.#mapServer.mapTermGraph(this.#uuid))!
+          const termGraph = (await this.#mapServer.mapTermGraph(this.#uuid))
           this.#mapTermGraph.load(termGraph)
           this.#mapTermGraphLoaded = true
         }
@@ -564,7 +564,7 @@ export class FlatMap
     {
         if (this.#mapMetadata.legend) {
             return this.#mapMetadata.legend
-        } else if (this.options.style == FLATMAP_STYLE.ANATOMICAL) {
+        } else if (this.options.style === FLATMAP_STYLE.ANATOMICAL) {
             return FLATMAP_LEGEND
         }
         return []
@@ -641,7 +641,7 @@ export class FlatMap
     zoomIn()
     //======
     {
-        this.#map!.zoomIn()
+        this.#map.zoomIn()
     }
 
     /**
@@ -650,7 +650,7 @@ export class FlatMap
     zoomOut()
     //=======
     {
-        this.#map!.zoomOut()
+        this.#map.zoomOut()
     }
 
     /**
@@ -735,7 +735,7 @@ export class FlatMap
     //===========================
     {
 
-        const response = await this.#map!.loadImage(url)
+        const response = await this.#map.loadImage(url)
         return response.data
     }
 
@@ -752,11 +752,11 @@ export class FlatMap
     async #addImage(id, path, baseUrl, options={})
     //============================================
     {
-        if (!this.#map!.hasImage(id)) {
+        if (!this.#map.hasImage(id)) {
             const image = await (path.startsWith('data:image') ? this.#loadEncodedImage(path)
                                                                : this.#loadImage(path.startsWith('/') ? this.makeServerUrl(path)
                                                                                                       : new URL(path, baseUrl).href))
-            this.#map!.addImage(id, <ImageBitmap>image, options)
+            this.#map.addImage(id, <ImageBitmap>image, options)
         }
     }
 
@@ -1050,8 +1050,8 @@ export class FlatMap
         // Pre-compute LineStrings of centrelines in centreline maps
         if (this.options.style === FLATMAP_STYLE.CENTRELINE && ann.centreline) {
             try {
-                ann['lineString'] = turf.lineString(ann.coordinates!)
-                ann['lineLength'] = turfLength.length(ann.lineString)
+                ann.lineString = turf.lineString(ann.coordinates)
+                ann.lineLength = turfLength.length(ann.lineString)
             } catch(_) {
                 console.log(`Bad centreline for ${ann.id}, ${ann.models}, coordinates: ${ann.coordinates}`)
             }
@@ -1076,7 +1076,7 @@ export class FlatMap
         } else {
             featureIds.extend(this.modelFeatureIds(anatomicalIds))
         }
-        if (featureIds.length == 0) {
+        if (featureIds.length === 0) {
             // We couldn't find a feature by anatomical id, so check dataset and source
             if (Array.isArray(anatomicalIds)) {
                 for (const id of anatomicalIds) {
@@ -1088,7 +1088,7 @@ export class FlatMap
                 featureIds.extend(this.#mapSourceToFeatureIds.get(anatomicalIds) || [])
             }
         }
-        if (featureIds.length == 0 && this.#userInteractions !== null) {
+        if (featureIds.length === 0 && this.#userInteractions !== null) {
             // We still haven't found a feature, so check connectivity
             featureIds.extend(this.#userInteractions.pathFeatureIds(anatomicalIds))
         }
@@ -1099,7 +1099,7 @@ export class FlatMap
     //================================================
     {
         const ann = this.#idToAnnotation.get(+featureId)
-        return (ann && 'models' in ann) ? utils.normaliseId(ann.models!) : null
+        return (ann && 'models' in ann) ? utils.normaliseId(ann.models) : null
     }
 
     /**
