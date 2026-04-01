@@ -27,7 +27,8 @@
     "preview-docs": "live-server docs",
     "lint": "eslint ./src/",
     "typecheck": "tsc --noEmit -p tsconfig-build.json --composite false",
-    "tsdoc": "typedoc"
+    "tsdoc": "typedoc",
+    "postinstall": "bash ./scripts/postinstall.sh"
   },
   "author": "David Brooks",
   "license": "Apache-2.0",
@@ -36,6 +37,7 @@
     "@deck.gl/geo-layers": "^9.1.8",
     "@deck.gl/layers": "^9.1.8",
     "@deck.gl/mapbox": "^9.1.8",
+    "@jeswr/pretty-turtle": "^1.8.2",
     "@luma.gl/engine": "^9.1.7",
     "@mapbox/mapbox-gl-draw": "=1.4.3",
     "@turf/along": "^7.1.0",
@@ -56,6 +58,7 @@
     "maplibre-gl": "^5.5.0",
     "mathjax-full": "^3.2.2",
     "minisearch": "^2.2.1",
+    "oxigraph": "^0.5.6",
     "polylabel": "^2.0.1",
     "uuid": "^11.1.0"
   },

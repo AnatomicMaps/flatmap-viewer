@@ -6,3 +6,5 @@
 /out/
 .DS_Store
 map-viewer.sublime-workspace
+
+src/assets/oxigraph

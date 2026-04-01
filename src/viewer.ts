@@ -28,6 +28,7 @@ import {
 } from './flatmap-types'
 import {FlatMapServer} from './mapserver'
 import {noFlatMapPathways} from './pathways'
+import * as $rdf from './knowledge/rdf'
 import * as utils from './utils'
 
 //==============================================================================
@@ -234,6 +235,10 @@ export class MapViewer
     async loadMap(identifier: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap|null>
     //====================================================================================================================
     {
+        // Make sure our RDF engine is initialised
+
+        await $rdf.initialise()
+
         const map = await this.findMap(identifier)
         if (map === null) {
             throw new Error(`Unknown map: ${JSON.stringify(identifier)}`)
@@ -320,6 +325,10 @@ export class MapViewer
 
         const mapMetadata: FlatMapMetadata|null = (await this.#mapServer.mapMetadata(mapId))!
 
+        // Get RDF knowledge for the map
+
+        const mapKnowledge: string|undefined = (await this.#mapServer.mapKnowledge(mapId))
+
         // Set zoom range if not specified as an option
 
         if ('vector-tiles' in mapStyle.sources) {
@@ -372,7 +381,8 @@ export class MapViewer
                 annotations,
                 callback,
                 pathways,
-                mapMetadata
+                mapMetadata,
+                mapKnowledge
             })
         await flatmap.mapLoaded()
         return flatmap

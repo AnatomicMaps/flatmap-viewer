@@ -16,6 +16,7 @@ export default defineConfig({
       entry: path.resolve(__dirname, 'lib/index.ts'),
       name: 'FlatmapViewer'
     },
+    target: 'esnext',
     rollupOptions: {
       output: {
         // Put chunk files at <output>/chunks
@@ -26,4 +27,12 @@ export default defineConfig({
       }
     }
   },
+  optimizeDeps: {
+      esbuildOptions: {
+          target: 'esnext'
+      },
+      exclude: [
+          '*.wasm'
+      ]
+  }
 })

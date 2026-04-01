@@ -181,6 +181,22 @@ export class FlatMapServer
         return this.#loadJSON<FlatMapAnnotations>(`flatmap/${mapId}/annotations`)
     }
 
+    async mapKnowledge(mapId: string): Promise<string|undefined>
+    //==========================================================
+    {
+        const url = this.url(`flatmap/${mapId}`)
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                "Accept": "text/turtle; charset=utf-8",
+                "Cache-Control": "no-store"
+            }
+        })
+        if (response.ok) {
+            return await response.text()
+        }
+    }
+
     async mapMetadata(mapId: string): Promise<FlatMapMetadata|null>
     //=============================================================
     {

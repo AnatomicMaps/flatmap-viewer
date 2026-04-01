@@ -65,6 +65,7 @@ import {APINATOMY_PATH_PREFIX, PathType} from './pathways'
 import {SearchIndex} from './search'
 
 import * as images from './images'
+import * as $rdf from './knowledge/rdf'
 import * as utils from './utils'
 
 //==============================================================================
@@ -191,7 +192,8 @@ export type MapDescription = {
     annotations: FlatMapAnnotations
     callback: FlatMapCallback
     pathways: FlatMapPathways
-    mapMetadata: FlatMapMetadata
+    mapMetadata: FlatMapMetadata,
+    mapKnowledge?: string
 }
 
 //==============================================================================
@@ -237,6 +239,7 @@ export class FlatMap
     #normalised_size: [number, number]
     #options: MapDescriptionOptions
     #pathways: FlatMapPathways
+    #rdfStore = new $rdf.RdfStore()
     #searchIndex: SearchIndex = new SearchIndex()
     #startupState = -1
     #style: FlatMapStyleSpecification
@@ -280,6 +283,16 @@ export class FlatMap
         for (const [featureId, annotation] of Object.entries(mapDescription.annotations)) {
             this.#saveAnnotation(+featureId, annotation)
             this.#searchIndex.indexMetadata(+featureId, annotation)
+        }
+
+        // Add any RDF knowledge to the local store
+
+        if (mapDescription.mapKnowledge) {
+            try {
+                this.#rdfStore.load('bttp://anatomic-maps.org/baseuri', mapDescription.mapKnowledge)   /// <<< URI
+            } catch(err) {
+                console.log(err, mapDescription.mapKnowledge)
+            }
         }
 
         // Set base of source URLs in map's style
@@ -2324,6 +2337,15 @@ export class FlatMap
             return [...featurePaths.values()]
         }
         return []
+    }
+
+    //==========================================================================
+
+    /**
+     * Use SPARQL to query a map's local RDF knowledge.
+     */
+    sparqlQuery(sparql: string, options: $rdf.QueryOptions={}): $rdf.QueryResult {
+        return this.#rdfStore.query(sparql, options)
     }
 
     //==========================================================================
