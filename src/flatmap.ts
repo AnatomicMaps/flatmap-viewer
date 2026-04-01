@@ -33,8 +33,8 @@ import '../static/css/flatmap-viewer.css'
 
 //==============================================================================
 
-import {PropertiesFilterExpression} from './filters'
-import {
+import type {PropertiesFilterExpression} from './filters'
+import type {
     AnnotatedFeature,
     AnnotationDrawMode,
     AnnotationEvent,
@@ -61,7 +61,7 @@ import {UserInteractions} from './interactions'
 import {MapTermGraph} from './knowledge'
 import {KNOWLEDGE_SOURCE_SCHEMA, FlatMapServer} from './mapserver'
 import {loadMarkerIcons} from './markers'
-import {APINATOMY_PATH_PREFIX, PathType} from './pathways'
+import {APINATOMY_PATH_PREFIX, type PathType} from './pathways'
 import {SearchIndex} from './search'
 
 import * as images from './images'
@@ -1272,9 +1272,9 @@ export class FlatMap
     {
         return {
             mapUUID: this.#uuid,
-            minZoom: this.#map!.getMinZoom(),
-            zoom:    this.#map!.getZoom(),
-            maxZoom: this.#map!.getMaxZoom()
+            minZoom: this.#map.getMinZoom(),
+            zoom:    this.#map.getZoom(),
+            maxZoom: this.#map.getMaxZoom()
         }
     }
 
@@ -1319,7 +1319,7 @@ export class FlatMap
     {
         // Resize our map
 
-        this.#map!.resize(undefined, false)
+        this.#map.resize(undefined, false)
     }
 
     getIdentifier()
@@ -1396,7 +1396,7 @@ export class FlatMap
     getBackgroundColour(): string
     //===========================
     {
-        return this.#map!.getPaintProperty('background', 'background-color') as string
+        return this.#map.getPaintProperty('background', 'background-color') as string
     }
 
     /**
@@ -1407,7 +1407,7 @@ export class FlatMap
     getBackgroundOpacity(): number
     //============================
     {
-        return this.#map!.getPaintProperty('background', 'background-opacity') as number
+        return this.#map.getPaintProperty('background', 'background-opacity') as number
     }
 
     /**
@@ -1420,10 +1420,10 @@ export class FlatMap
     {
         localStorage.setItem('flatmap-background-colour', colour)
 
-        this.#map!.setPaintProperty('background', 'background-color', colour)
+        this.#map.setPaintProperty('background', 'background-color', colour)
 
-        if (this.#userInteractions!.minimap) {
-            this.#userInteractions!.minimap.setBackgroundColour(colour)
+        if (this.#userInteractions.minimap) {
+            this.#userInteractions.minimap.setBackgroundColour(colour)
         }
     }
 
@@ -1435,10 +1435,10 @@ export class FlatMap
     setBackgroundOpacity(opacity: number)
     //===================================
     {
-        this.#map!.setPaintProperty('background', 'background-opacity', opacity)
+        this.#map.setPaintProperty('background', 'background-opacity', opacity)
 
-        if (this.#userInteractions!.minimap) {
-            this.#userInteractions!.minimap.setBackgroundOpacity(opacity)
+        if (this.#userInteractions.minimap) {
+            this.#userInteractions.minimap.setBackgroundOpacity(opacity)
         }
     }
 
@@ -1450,8 +1450,8 @@ export class FlatMap
     showMinimap(show: boolean)
     //========================
     {
-        if (this.#userInteractions!.minimap) {
-            this.#userInteractions!.minimap.show(show)
+        if (this.#userInteractions.minimap) {
+            this.#userInteractions.minimap.show(show)
         }
 
     }
@@ -1738,7 +1738,7 @@ export class FlatMap
     exportedFeatureProperties(properties: FlatMapFeatureAnnotation): ExportedFeatureProperties
     //========================================================================================
     {
-        const data = {}
+        const data: Record<string, unknown> = {}
         for (const property of this.#exportedFeatureProperties) {
             if (property in properties) {
                 const value = properties[property]
@@ -1757,10 +1757,10 @@ export class FlatMap
             }
         }
         if ('models' in data) {
-            data['id'] = data.models
+            data.id = data.models
         }
         if (Object.keys(data).length > 0) {
-            data['type'] = 'feature'
+            data.type = 'feature'
         }
         return data
     }
@@ -1992,7 +1992,7 @@ export class FlatMap
     panZoomEvent(type: string)
     //========================
     {
-        const bounds = this.#map!.getBounds()
+        const bounds = this.#map.getBounds()
         if (this.#normalisedOrigin) {
             const sw = maplibregl.MercatorCoordinate.fromLngLat(bounds.toArray()[0])
             const ne = maplibregl.MercatorCoordinate.fromLngLat(bounds.toArray()[1])
@@ -2024,7 +2024,7 @@ export class FlatMap
             const sw_y = ne_y + size[1]*this.#normalised_size[1]
             const sw = (new maplibregl.MercatorCoordinate(sw_x, sw_y, 0)).toLngLat()
             const ne = (new maplibregl.MercatorCoordinate(ne_x, ne_y, 0)).toLngLat()
-            this.#map!.fitBounds([sw, ne], {animate: false})
+            this.#map.fitBounds([sw, ne], {animate: false})
         }
     }
 
@@ -2332,7 +2332,7 @@ export class FlatMap
         for (const featureId of uniqueIds) {
             const annotation = this.#idToAnnotation.get(+featureId)
             if (annotation && 'anatomical-nodes' in annotation) {
-                for (const node of annotation['anatomical-nodes']!) {
+                for (const node of annotation['anatomical-nodes']) {
                     connectivityNodes.add(node)
                 }
             }
