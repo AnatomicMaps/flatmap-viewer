@@ -18,17 +18,20 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Map as MapLibreMap} from 'maplibre-gl'
-import {DataDrivenPropertyValueSpecification, GeoJSONSource} from 'maplibre-gl'
+import type {
+    DataDrivenPropertyValueSpecification,
+    GeoJSONSource,
+    Map as MapLibreMap
+} from 'maplibre-gl'
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
-import {DatasetMarkerResult, DatasetTerms, MarkerKind} from '../flatmap-types'
+import type {FlatMap} from '../flatmap'
+import type {DatasetMarkerResult, DatasetTerms, MarkerKind} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
-import {UserInteractions} from '../interactions'
+import type {UserInteractions} from '../interactions'
 import {DATASET_CLUSTERED_MARKER, MULTISCALE_CLUSTERED_MARKER} from '../markers'
-import {PropertiesType} from '../types'
+import type {PropertiesType} from '../types'
 
 import {DatasetClusterSet, MAX_MARKER_ZOOM} from './datasetcluster'
 
@@ -112,7 +115,7 @@ export class ClusteredAnatomicalMarkerLayer
     {
         this.#ui = ui
         this.#flatmap = flatmap
-        this.#map = flatmap.map!
+        this.#map = flatmap.map
         this.#maxZoom = Math.ceil(this.#map.getMaxZoom())
 
         this.#map.addSource(ANATOMICAL_MARKERS_SOURCE, {
@@ -159,7 +162,7 @@ export class ClusteredAnatomicalMarkerLayer
             if (termFeatures.length) {
                 const annotation = this.#flatmap.annotation(termFeatures[0])
                 if (annotation && 'label' in annotation) {
-                    result.label = annotation.label!
+                    result.label = annotation.label
                 }
             }
             return result
@@ -184,7 +187,7 @@ export class ClusteredAnatomicalMarkerLayer
                 const annotation = this.#flatmap.annotation(featureId)
                 if (!annotation
                  || annotation.centreline
-                 || !('markerPosition' in annotation) && !annotation.geometry!.includes('Polygon')) {
+                 || !('markerPosition' in annotation) && !annotation.geometry.includes('Polygon')) {
                     continue
                 }
                 const markerId = this.#ui.nextMarkerId()
@@ -194,7 +197,7 @@ export class ClusteredAnatomicalMarkerLayer
                     id: markerId,
                     properties: {
                         featureId,
-                        'icon-zoom': this.#multiScaleByZoomTerm.get(term)!.map(ms => ms ? MULTISCALE_CLUSTERED_MARKER : DATASET_CLUSTERED_MARKER),
+                        'icon-zoom': this.#multiScaleByZoomTerm.get(term).map(ms => ms ? MULTISCALE_CLUSTERED_MARKER : DATASET_CLUSTERED_MARKER),
                         label: annotation.label,
                         models: term,
                         'zoom-count': countByZoom
@@ -206,7 +209,7 @@ export class ClusteredAnatomicalMarkerLayer
                 }
                 const markerState = this.#ui.getFeatureState(featureId)
                 if (markerState && 'hidden' in markerState) {
-                    markerPoint.properties['hidden'] = markerState.hidden
+                    markerPoint.properties.hidden = markerState.hidden
                 }
                 markerPoints.push(markerPoint)
                 this.#featureToTerm.set(+featureId, term)
@@ -250,7 +253,7 @@ export class ClusteredAnatomicalMarkerLayer
                     }
                     for (let zoom = cluster.minZoom; zoom < cluster.maxZoom; zoom += 1) {
                         zoomDatasets[zoom].add(cluster.datasetId)
-                        zoomMultiscale![zoom] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
+                        zoomMultiscale[zoom] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
                         const datasetTerms = clusteredSet.descendents.get(cluster.markerTerm)
                         if (datasetTerms) {
                             for (const term of datasetTerms.values()) {
@@ -260,7 +263,7 @@ export class ClusteredAnatomicalMarkerLayer
                     }
                     if (cluster.maxZoom === MAX_MARKER_ZOOM) {
                         zoomDatasets[MAX_MARKER_ZOOM].add(cluster.datasetId)
-                        zoomMultiscale![MAX_MARKER_ZOOM] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
+                        zoomMultiscale[MAX_MARKER_ZOOM] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
                         const datasetTerms = clusteredSet.descendents.get(cluster.markerTerm)
                         if (datasetTerms) {
                             for (const term of datasetTerms.values()) {
@@ -282,7 +285,7 @@ export class ClusteredAnatomicalMarkerLayer
                         this.#markerTerms.set(term, new Set())
                     }
                     for (const datasetTerm of datasetTerms.values()) {
-                        this.#markerTerms.get(term)!.add(datasetTerm)
+                        this.#markerTerms.get(term).add(datasetTerm)
                         if (this.#kindByTerm.get(datasetTerm) !== 'multiscale') {
                             this.#kindByTerm.set(datasetTerm, dataset.kind || 'dataset')
                         }

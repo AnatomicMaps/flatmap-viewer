@@ -1001,7 +1001,7 @@ export class FlatMap
             }
         } else if (missingId !== null
                && 'models' in annotation
-               && annotation.models!.startsWith(APINATOMY_PATH_PREFIX)) {
+               && annotation.models.startsWith(APINATOMY_PATH_PREFIX)) {
             this.#updateFeatureIdMapEntry(missingId, featureIdMap, annotation.featureId)
         }
     }
@@ -1658,17 +1658,12 @@ export class FlatMap
      * This method should only be called in response to a ``mouseenter`` event
      * passed to the map's ``callback`` function otherwise a popup won't be shown.
      *
-     * @param      {integer}  markerId  The identifier of the marker
-     * @param      {string | DOMElement}  content  The popup's content
-     * @param      {Object}  options
-     * @returns    {boolean} Return true if the popup is shown
-     *
      * The resulting popup is given a class name of ``flatmap-tooltip-popup``.
      *
      * @group Markers
      */
-    showMarkerPopup(markerId, content, options={}): boolean
-    //=====================================================
+    showMarkerPopup(markerId: number, content: string|HTMLElement, options={}): boolean
+    //=================================================================================
     {
         if (this.#userInteractions !== null) {
             return this.#userInteractions.showMarkerPopup(markerId, content, options)

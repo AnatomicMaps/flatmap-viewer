@@ -18,26 +18,26 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Map as MapLibreMap} from 'maplibre-gl'
+import type {Map as MapLibreMap} from 'maplibre-gl'
 
 //==============================================================================
 
-import {PropertiesFilter, StyleFilterType} from '../filters'
+import {PropertiesFilter, type StyleFilterType} from '../filters'
 import {DetailsFilter} from '../filters/facets/details'
-import {FilteredFacet} from '../filters/facets'
-import {DatasetTerms, DatasetMarkerResult, FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
-import {FlatMapFeatureAnnotation, FlatMapMarkerOptions} from '../flatmap-types'
+import type {FilteredFacet} from '../filters/facets'
+import type {DatasetTerms, DatasetMarkerResult, FlatMapImageLayer, FlatMapLayer} from '../flatmap-types'
+import type {FlatMapFeatureAnnotation, FlatMapMarkerOptions} from '../flatmap-types'
 import type {GeoJSONId, MapExtent, MapFeature, MapRenderedFeature, MapPointFeature} from '../flatmap-types'
-import {FlatMap, FLATMAP_STYLE} from '../flatmap'
+import {type FlatMap, FLATMAP_STYLE} from '../flatmap'
 import {PATHWAYS_LAYER} from '../pathways'
-import {UserInteractions} from '../interactions'
+import type {UserInteractions} from '../interactions'
 import * as utils from '../utils'
 
 import {ANATOMICAL_MARKERS_LAYER, ClusteredAnatomicalMarkerLayer} from './acluster'
 
 import * as style from './styling'
-import {BackgroundStyleLayer, BodyStyleLayer, RasterStyleLayer, StylingOptions} from './styling'
-import {VectorStyleLayer, VECTOR_TILES_SOURCE} from './styling'
+import {BackgroundStyleLayer, BodyStyleLayer, RasterStyleLayer, type StylingOptions} from './styling'
+import {type VectorStyleLayer, VECTOR_TILES_SOURCE} from './styling'
 
 import {DeckGlOverlay} from './deckgl'
 import {FlightPathLayer} from './flightpaths'
@@ -56,7 +56,7 @@ const REVERT_DETAIL_ZOOM_OFFSET = 0.5
 export function isMarker(feature: MapFeature|MapRenderedFeature): boolean
 {
     return (feature.properties.marker
-         || 'layer' in feature && feature.layer!.id === ANATOMICAL_MARKERS_LAYER)
+         || 'layer' in feature && feature.layer.id === ANATOMICAL_MARKERS_LAYER)
 }
 
 //==============================================================================
@@ -83,7 +83,7 @@ class FlatMapStylingLayer
     {
         this.#id = layer.id
         this.#layer = layer
-        this.#map = flatmap.map!
+        this.#map = flatmap.map
         this.#description = layer.description || ''
         this.#layerOptions = options
         this.#separateLayers = flatmap.options.separateLayers
@@ -107,7 +107,7 @@ class FlatMapStylingLayer
         const layerId = `${layer.id}_${FEATURES_LAYER}`
         const source = flatmap.options.separateLayers ? layerId : FEATURES_LAYER
 
-        if (this.#map.getSource(style.VECTOR_TILES_SOURCE)!.vectorLayerIds!.indexOf(source) >= 0) {
+        if (this.#map.getSource(style.VECTOR_TILES_SOURCE).vectorLayerIds.indexOf(source) >= 0) {
             const bodyLayer = new BodyStyleLayer(layerId, source)
             this.#addStylingLayer(bodyLayer.style(layer, this.#layerOptions), true)
             this.#vectorStyleLayers.push(bodyLayer)
@@ -147,7 +147,7 @@ class FlatMapStylingLayer
 
         if (haveVectorLayers) {
             const featuresVectorSource = this.#vectorSourceId(FEATURES_LAYER)
-            const vectorFeatures = vectorTileSource.vectorLayerIds!.includes(featuresVectorSource)
+            const vectorFeatures = vectorTileSource.vectorLayerIds.includes(featuresVectorSource)
             if (vectorFeatures) {
                 this.#addVectorStyleLayer(style.FeatureFillLayer, FEATURES_LAYER, false, true)
                 this.#addVectorStyleLayer(style.FeatureDashLineLayer, FEATURES_LAYER, false, true)
@@ -190,7 +190,7 @@ class FlatMapStylingLayer
     get centre(): [number, number]
     //============================
     {
-        const extent = this.#layer.extent!
+        const extent = this.#layer.extent
         return [(extent[0] + extent[2])/2, (extent[1] + extent[3])/2]
     }
 
@@ -203,7 +203,7 @@ class FlatMapStylingLayer
     get extent(): MapExtent
     //=====================
     {
-        return this.#layer.extent!
+        return this.#layer.extent
     }
 
     get id()
@@ -227,7 +227,7 @@ class FlatMapStylingLayer
     get minZoom(): number
     //===================
     {
-        return this.#layer['min-zoom']!
+        return this.#layer['min-zoom']
     }
 
     get parentLayer()
@@ -449,7 +449,7 @@ export class LayerManager
     constructor(flatmap: FlatMap, ui: UserInteractions)
     {
         this.#flatmap = flatmap
-        this.#map = flatmap.map!
+        this.#map = flatmap.map
         this.#layerOptions = utils.setDefaults(flatmap.options.layerOptions, {
             coloured: true,
             flatmapStyle: flatmap.options.style,
@@ -710,7 +710,7 @@ export class LayerManager
     //==========================================================
     {
         if (this.#baseLayer === null) {
-            this.#baseLayer = this.#mapStyleLayers.get(currentLayerId)!
+            this.#baseLayer = this.#mapStyleLayers.get(currentLayerId)
         }
         const detailLayer = this.#mapStyleLayers.get(layerId)
         if (detailLayer) {
@@ -763,7 +763,6 @@ export class LayerManager
             this.setFilter({sckan: newState})
         }
 
-        // @ts-ignore
         const sckanState = options.sckan || 'valid'
         const sckanFilter = (sckanState == 'none') ? {NOT: {HAS: 'sckan'}} :
                             (sckanState == 'valid') ? {sckan: true} :
@@ -771,7 +770,6 @@ export class LayerManager
                             true
         const featureFilter = new PropertiesFilter(sckanFilter)
         if ('taxons' in options) {
-            // @ts-ignore
             featureFilter.narrow({taxons: options.taxons})
         }
 

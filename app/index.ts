@@ -18,11 +18,13 @@ limitations under the License.
 
 ******************************************************************************/
 
-import { FlatMap, FlatMapOptions, MapViewer } from '../lib'
 
-import {DrawControl} from './annotator'
-import type {DrawEvent} from './annotator'
+import type {DrawControl, DrawEvent} from './annotator'
 import {PaneManager} from './multipane'
+
+//import { DATASETS } from './datasets'
+
+import { type FlatMap, type FlatMapOptions, MapViewer } from '../lib'
 
 //==============================================================================
 
@@ -121,7 +123,7 @@ function provenanceAsHtml(dict): string
             let value = dict[key]
             if (value instanceof Object && value.constructor === Object) {
                 value = fieldAsHtml(value, 1, (key==='connectivity'))
-            } else if (key == 'created') {
+            } else if (key === 'created') {
                 if (mapServer && mapID) {
                     value = `${value}&nbsp;&nbsp;<a target="_blank" href="${mapServer}/flatmap/${mapID}/log">Log file</a>`
                 }
@@ -143,10 +145,10 @@ class StandaloneViewer
     #drawControl: DrawControl|null = null
 
     #mapEndpoints: object
-    #mapSelector: HTMLSelectElement|null
-    #mapGeneration: HTMLSelectElement|null
+    #mapSelector: HTMLSelectElement
+    #mapGeneration: HTMLSelectElement
     #mapOptions: FlatMapOptions
-    #mapProvenance: HTMLElement|null
+    #mapProvenance: HTMLElement
 
     #mapIdToName = new Map()
     #mapGenerations = new Map()
@@ -186,7 +188,7 @@ class StandaloneViewer
             } else {
                 // Running remotely so don't confuse the user...
                 if ('local' in this.#mapEndpoints) {
-                    delete this.#mapEndpoints['local']
+                    delete this.#mapEndpoints.local
                 }
                 for (const [server, endpoint] of Object.entries(this.#mapEndpoints)) {
                     if (endpoint === requestEndpoint) {
@@ -202,6 +204,7 @@ class StandaloneViewer
         }
         if (Object.keys(this.#mapEndpoints).length <= 1) {
             // Don't allow server selection if there's just a single server
+            // biome-ignore lint/style/noNonNullAssertion: we have a `server-selection` element
             document.getElementById('server-selection')!.hidden = true
         } else {
             const mapServerList: string[] = []
@@ -211,8 +214,8 @@ class StandaloneViewer
             }
             mapServerList.splice(0, 0, '<option value="">Select flatmap server...</option>')
             const serverSelector = document.getElementById('server-selector') as HTMLSelectElement
-            serverSelector!.innerHTML = mapServerList.join('')
-            serverSelector!.onchange = async (e) => {
+            serverSelector.innerHTML = mapServerList.join('')
+            serverSelector.onchange = async (e) => {
                 const value = (<HTMLSelectElement>e.target).value
                 if (value !== '') {
                     this.changeMapServer(value)
@@ -227,7 +230,7 @@ class StandaloneViewer
 
         this.#mapSelector = document.getElementById('map-selector') as HTMLSelectElement
         this.#mapGeneration = document.getElementById('map-generation') as HTMLSelectElement
-        this.#mapProvenance = document.getElementById('provenance-display')
+        this.#mapProvenance = document.getElementById('provenance-display') as HTMLElement
         this.#paneManager = new PaneManager(VIEWER_CANVAS, MAX_VIEWER_PANES)
 
         this.changeMapServer(this.#currentServer)
@@ -265,6 +268,7 @@ class StandaloneViewer
     async loadMapList()
     //=================
     {
+        // biome-ignore lint/style/noNonNullAssertion: we have a viewer
         await this.setMapList(this.#currentViewer!)
     }
 
@@ -325,15 +329,15 @@ class StandaloneViewer
         }
         mapList.splice(0, 0, '<option value="">Select flatmap...</option>')
 
-        this.#mapSelector!.innerHTML = mapList.join('')
-        this.#mapSelector!.onchange = async (e) => {
+        this.#mapSelector.innerHTML = mapList.join('')
+        this.#mapSelector.onchange = async (e) => {
             const value = (<HTMLSelectElement>e.target).value
             if (value !== '') {
                 this.setGenerationSelector(value)
                 await this.loadMap(this.#currentViewer!, value)
             }
         }
-        this.#mapGeneration!.onchange = async (e: Event) => {
+        this.#mapGeneration.onchange = async (e: Event) => {
             const value = (<HTMLSelectElement>e.target).value
             if (value !== '') {
                 await this.loadMap(this.#currentViewer!, value)
@@ -344,8 +348,8 @@ class StandaloneViewer
         this.#mapTaxon ||= this.#viewMapTaxon
         this.#mapSex ||= this.#viewMapSex
         if (!(this.#mapId || this.#mapTaxon)) {
-            this.#mapId = this.#mapSelector!.options[1].value
-            this.#mapSelector!.options[1].selected = true
+            this.#mapId = this.#mapSelector.options[1].value
+            this.#mapSelector.options[1].selected = true
         }
 
         this.setGenerationSelector(this.#mapId!)
@@ -364,13 +368,13 @@ class StandaloneViewer
                 generationList.push(`<option value="${id}" ${selected}>${map.created}</option>`)
             }
         }
-        this.#mapGeneration!.innerHTML = generationList.join('')
+        this.#mapGeneration.innerHTML = generationList.join('')
     }
 
     async loadMap(viewer: MapViewer, id: string, taxon: string|null=null, sex: string|null=null)
     //==========================================================================================
     {
-        this.#mapProvenance!.innerHTML = ''
+        this.#mapProvenance.innerHTML = ''
         if (id !== null) {
             this.#requestUrl.searchParams.set('id', id)
             this.#requestUrl.searchParams.delete('taxon')
@@ -383,6 +387,7 @@ class StandaloneViewer
             }
             this.#requestUrl.searchParams.delete('id')
         }
+        // biome-ignore lint/style/noNonNullAssertion: we have a server
         this.#requestUrl.searchParams.set('server', this.#currentServer!)
 
         // Update address bar URL to current map
@@ -394,6 +399,7 @@ class StandaloneViewer
                 this.#currentMap = map
                 if (this.#mapProvenance && PROVENANCE_DISPLAY) {
                     this.#mapProvenance.style.display = 'block'
+                    // biome-ignore lint/style/noNonNullAssertion: we have a server
                     this.#mapProvenance.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
                                                                      map.mapMetadata))
                 }
@@ -465,6 +471,7 @@ class StandaloneViewer
             }
             if ('hyperlinks' in data) {
                 if ('flatmap' in data.hyperlinks) {
+                    // biome-ignore lint/style/noNonNullAssertion: we have a viewer
                     await this.#paneManager.loadMap(this.#currentViewer!, data.hyperlinks.flatmap,
                                                     this.mapCallback.bind(this), this.#mapOptions,
                                                     true)

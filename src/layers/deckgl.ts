@@ -18,14 +18,14 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Layer} from '@deck.gl/core'
+import type {Layer} from '@deck.gl/core'
 import {MapboxOverlay} from '@deck.gl/mapbox'
 
-import {IControl, Map as MapLibreMap} from 'maplibre-gl'
+import type {IControl, Map as MapLibreMap} from 'maplibre-gl'
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
+import type {FlatMap} from '../flatmap'
 
 //==============================================================================
 
@@ -44,7 +44,7 @@ export class DeckGlOverlay
 
     constructor(flatmap: FlatMap)
     {
-        this.#map = flatmap.map!
+        this.#map = flatmap.map
 
         this.#map.addControl(this.#overlay as IControl)
     }

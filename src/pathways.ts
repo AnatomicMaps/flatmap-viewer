@@ -22,10 +22,10 @@ import {colord} from 'colord'
 
 //==============================================================================
 
-import {FlatMap, FLATMAP_STYLE} from './flatmap'
+import {type FlatMap, FLATMAP_STYLE} from './flatmap'
 import type {FlatMapPathways, GeoJSONId, PathDetailsType} from './flatmap-types'
-import {UserInteractions} from './interactions'
-import {Callback} from './types'
+import type {UserInteractions} from './interactions'
+import type {Callback} from './types'
 import {reverseMap} from './utils'
 
 export const PATHWAYS_LAYER = 'pathways'
@@ -83,8 +83,8 @@ export function pathColourArray(pathType: string, alpha: number=255): RGBAArray
 //=============================================================================
 {
     const rgb = colord(PathTypeMap.has(pathType)
-                        ? PathTypeMap.get(pathType)!.colour
-                        : PathTypeMap.get('other')!.colour).toRgb()
+                        ? PathTypeMap.get(pathType).colour
+                        : PathTypeMap.get('other').colour).toRgb()
     return [rgb.r, rgb.g, rgb.b, alpha]
 }
 
@@ -176,7 +176,7 @@ export class PathManager
                 this.#paths[pathId] = path
                 this.#paths[pathId].systemCount = 0
                 if ('models' in path) {
-                    const modelId = path['models']!
+                    const modelId = path.models
                     if (!(modelId in this.#pathModelPaths)) {
                         this.#pathModelPaths[modelId] = []
                     }
@@ -187,7 +187,7 @@ export class PathManager
                     if (!this.#pathsByCentreline.has(id)) {
                         this.#pathsByCentreline.set(id, new Set())
                     }
-                    this.#pathsByCentreline.get(id)!.add(pathId)
+                    this.#pathsByCentreline.get(id).add(pathId)
                 }
             }
         }
@@ -213,12 +213,12 @@ export class PathManager
 
         // Set path types, mapping unknown path types to ``other``
         this.#pathsByType = {}
-        this.#pathsByType['other'] = []
+        this.#pathsByType.other = []
         for (const [pathType, pathIds] of Object.entries(flatmap.pathways['type-paths'])) {
             if (pathType in pathTypes) {
                 this.#pathsByType[pathType] = pathIds
             } else {
-                this.#pathsByType['other'].push(...pathIds)
+                this.#pathsByType.other.push(...pathIds)
                 this.#pathtypeEnabled[pathType] = false
             }
             if (pathType === 'centreline') {
@@ -329,9 +329,9 @@ export class PathManager
     {
         for (const pathId of pathIds) {
             const path = this.#paths[pathId]
-            path.lines.forEach(lineId => featureSet.add(lineId))
-            path.nerves.forEach(nerveId => featureSet.add(nerveId))
-            path.nodes.forEach(nodeId => featureSet.add(nodeId))
+            path.lines.forEach(lineId => { featureSet.add(lineId) })
+            path.nerves.forEach(nerveId => { featureSet.add(nerveId) })
+            path.nodes.forEach(nodeId => { featureSet.add(nodeId) })
         }
     }
 
@@ -448,7 +448,7 @@ export class PathManager
             if (this.#pathtypeEnabled[path.pathType]
               && (force
                || enable && path.systemCount === 0
-               || !enable && path.systemCount == 1)) {
+               || !enable && path.systemCount === 1)) {
                 // and type(pathId) is enabled...
                 const featureIds: Set<GeoJSONId> = new Set()
                 this.#addPathsToFeatureSet([pathId], featureIds)
