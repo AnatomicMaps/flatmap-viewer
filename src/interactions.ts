@@ -1672,50 +1672,49 @@ export class UserInteractions
     addMarkerForFeature(featureId: number, markerId: number, options: FlatMapMarkerOptions={}): number
     //================================================================================================
     {
-            const annotation = this.#flatmap.annotation(featureId)
-            const markerPosition = this.markerPosition(annotation, options)
-            if (markerPosition === null || annotation.kind === 'zoom-point') {
-                return markerId
+        const annotation = this.#flatmap.annotation(featureId)
+        const markerPosition = this.markerPosition(annotation, options)
+        if (markerPosition === null || annotation.kind === 'zoom-point') {
+            return markerId
+        }
+        // Only create a marker if there's not already one for the feature
+        // NB. If several features have the same anatomical id then each will have
+        //     a marker, all with the same marker id
+        if (!('marker' in annotation)) {
+            if (markerId === -1) {
+                markerId = this.nextMarkerId()
             }
-            // Only create a marker if there's not already one for the feature
-            // NB. If several features have the same anatomical id then each will have
-            //     a marker, all with the same marker id
-            if (!('marker' in annotation)) {
-                if (markerId === -1) {
-                    markerId = this.nextMarkerId()
-                }
 
-                // MapLibre dynamically sets a transform on marker elements so in
-                // order to apply a scale transform we need to create marker icons
-                // inside the marker container <div>
-                const colour = options.colour || MARKER_DEFAULT_COLOUR
-                const markerHTML = options.element ? new maplibregl.Marker({element: options.element})
-                                                   : new maplibregl.Marker({color: colour, scale: 0.5})
-                const markerElement = document.createElement('div')
-                const markerIcon = document.createElement('div')
-                markerIcon.innerHTML = markerHTML.getElement().innerHTML
-                markerElement.id = `marker-${markerId}`
-                markerElement.appendChild(markerIcon)
-                const markerOptions: maplibregl.MarkerOptions = {element: markerElement}
-                if ('className' in options) {
-                    markerOptions.className = options.className
-                }
-                const marker = new maplibregl.Marker(markerOptions)
-                                             .setLngLat(markerPosition)
-                                             .addTo(this.#map)
-                markerElement.addEventListener('mouseenter', this.#markerMouseEvent.bind(this, marker))
-                markerElement.addEventListener('mousemove', this.#markerMouseEvent.bind(this, marker))
-                markerElement.addEventListener('mouseleave', this.#markerMouseEvent.bind(this, marker))
-                markerElement.addEventListener('click', this.#markerMouseEvent.bind(this, marker))
-                this.#markerIdByMarker.set(marker, markerId)
-                if (!this.#featureEnabled(this.mapFeature(featureId))) {
-                    markerElement.style.visibility = 'hidden'
-                }
-
-                this.#markerIdByFeatureId.set(featureId, markerId)
-                // Remember that the feature has a marker
-                this.#annotationByMarkerId.set(markerId, annotation)
+            // MapLibre dynamically sets a transform on marker elements so in
+            // order to apply a scale transform we need to create marker icons
+            // inside the marker container <div>
+            const colour = options.colour || MARKER_DEFAULT_COLOUR
+            const markerHTML = options.element ? new maplibregl.Marker({element: options.element})
+                                               : new maplibregl.Marker({color: colour, scale: 0.5})
+            const markerElement = document.createElement('div')
+            const markerIcon = document.createElement('div')
+            markerIcon.innerHTML = markerHTML.getElement().innerHTML
+            markerElement.id = `marker-${markerId}`
+            markerElement.appendChild(markerIcon)
+            const markerOptions: maplibregl.MarkerOptions = {element: markerElement}
+            if ('className' in options) {
+                markerOptions.className = options.className
             }
+            const marker = new maplibregl.Marker(markerOptions)
+                                         .setLngLat(markerPosition)
+                                         .addTo(this.#map)
+            markerElement.addEventListener('mouseenter', this.#markerMouseEvent.bind(this, marker))
+            markerElement.addEventListener('mousemove', this.#markerMouseEvent.bind(this, marker))
+            markerElement.addEventListener('mouseleave', this.#markerMouseEvent.bind(this, marker))
+            markerElement.addEventListener('click', this.#markerMouseEvent.bind(this, marker))
+            this.#markerIdByMarker.set(marker, markerId)
+            if (!this.#featureEnabled(this.mapFeature(featureId))) {
+                markerElement.style.visibility = 'hidden'
+            }
+            this.#markerIdByFeatureId.set(featureId, markerId)
+            // Remember that the feature has a marker
+            this.#annotationByMarkerId.set(markerId, annotation)
+        }
         return markerId
     }
 
