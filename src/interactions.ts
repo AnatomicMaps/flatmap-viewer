@@ -1661,11 +1661,21 @@ export class UserInteractions
         const featureIds = this.#flatmap.modelFeatureIds(anatomicalId)
         let markerId = -1
         for (const featureId of featureIds) {
+            markerId = this.addMarkerForFeature(featureId, markerId, options)
+        }
+        if (markerId === -1) {
+            console.warn(`Unable to find feature '${anatomicalId}' on which to place marker`)
+        }
+        return markerId
+    }
+
+    addMarkerForFeature(featureId: number, markerId: number, options: FlatMapMarkerOptions={}): number
+    //================================================================================================
+    {
             const annotation = this.#flatmap.annotation(featureId)
             const markerPosition = this.markerPosition(annotation, options)
-            if (markerPosition === null
-             || annotation.kind === 'zoom-point') {
-                continue
+            if (markerPosition === null || annotation.kind === 'zoom-point') {
+                return markerId
             }
             // Only create a marker if there's not already one for the feature
             // NB. If several features have the same anatomical id then each will have
@@ -1706,10 +1716,6 @@ export class UserInteractions
                 // Remember that the feature has a marker
                 this.#annotationByMarkerId.set(markerId, annotation)
             }
-        }
-        if (markerId === -1) {
-            console.warn(`Unable to find feature '${anatomicalId}' on which to place marker`)
-        }
         return markerId
     }
 
