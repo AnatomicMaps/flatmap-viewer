@@ -34,7 +34,7 @@ import * as utils from './utils'
 //==============================================================================
 
 // The released version of the viewer
-export const VIEWER_VERSION = '4.5.3'
+export const VIEWER_VERSION = '4.6.0'
 
 //==============================================================================
 
