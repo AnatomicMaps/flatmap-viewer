@@ -1184,7 +1184,7 @@ export class FlatMap
      *
      * @group Properties
      */
-    get contextLost(): Boolean
+    get contextLost(): boolean
     //========================
     {
         return this.#contextLost
@@ -1595,17 +1595,16 @@ export class FlatMap
     /**
      * Add a list of markers to the map.
      *
-     * @param {Array.<string>}  anatomicalIds  Anatomical identifiers of features on which
-     *                                to place markers.
-     * @param {FlatMapMarkerOptions} options          Configurable options for the markers.
-     * @return     {array.<integer>}  The identifiers of the resulting markers. An empty array
-     *                                is returned if the map doesn't contain a feature with
-     *                                the given anatomical identifier
+     * @param anatomicalIds  Anatomical identifiers of features on which to place markers.
+     * @param options        Configurable options for the markers.
+     * @return               The identifiers of the resulting markers. An empty array
+     *                       is returned if the map doesn't contain a feature with
+     *                       the given anatomical identifier
      *
      * @group Markers
      */
-    addMarkers(anatomicalIds: string[],  options: FlatMapMarkerOptions={}): GeoJSONId[]
-    //=================================================================================
+    addMarkers(anatomicalIds: string[], options: FlatMapMarkerOptions={}): GeoJSONId[]
+    //================================================================================
     {
         options = Object.assign({cluster: true}, options)
         const markerIds: GeoJSONId[] = []
@@ -1660,8 +1659,7 @@ export class FlatMap
     /**
      * Remove a marker from the map.
      *
-     * @param      {integer}  markerId  The identifier of the marker, as returned
-     *                                  by ``addMarker()``
+     * @param markerId  The identifier of the marker, as returned by ``addMarker()``
      *
      * @group Markers
      */
@@ -1937,7 +1935,6 @@ export class FlatMap
     featureEvent(eventType: string, properties: FlatMapFeatureAnnotation|FlatMapFeatureAnnotation[])
     //==============================================================================================
     {
-
         if (Array.isArray(properties)) {
             const featureData: ExportedFeatureProperties[] = []
             for (const p of properties) {
