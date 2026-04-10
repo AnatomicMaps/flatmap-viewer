@@ -127,7 +127,7 @@ export class ClusteredMarkerLayer
         for (const feature of features) {
             const properties = feature.properties
             const position = properties.markerPosition.slice(1, -1).split(',').map(p => +p)
-            this.#ui.markerEvent(event, +feature.id!, position, properties)
+            this.#ui.handleMarkerEvent(event, +feature.id, position, properties)
         }
         event.originalEvent.stopPropagation()
     }

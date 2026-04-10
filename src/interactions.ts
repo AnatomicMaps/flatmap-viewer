@@ -1788,14 +1788,14 @@ export class UserInteractions
     #markerMouseEvent(marker: maplibregl.Marker, event)
     //=================================================
     {
-        // No tooltip when context menu is open
-        if (this.#modal
-         || (this.#activeMarker !== null && event.type === 'mouseleave')) {
+        // Ignore marker events when context menu is open
+        if (this.#modal) {
             return
         }
 
         // Remove any tooltips
         this.#removeTooltip()
+
         if (['mouseenter', 'mousemove', 'click'].includes(event.type)) {
             this.#activeMarker = marker
 
@@ -1808,43 +1808,42 @@ export class UserInteractions
             const markerId = this.#markerIdByMarker.get(marker)
             if (markerId) {
                 const annotation = this.#annotationByMarkerId.get(markerId)
-                // Show tooltip
-                const html = this.#tooltipHtml(annotation, true)
-                this.#showToolTip(html, marker.getLngLat())
-                // Send event to app
-                this.markerEvent(event, markerId, marker.getLngLat().toArray(), annotation)
+
+                // Finish marker event event processing and send it to the app
+                this.handleMarkerEvent(event, markerId, marker.getLngLat().toArray(), annotation)
             }
             event.stopPropagation()
         }
     }
 
-    markerEvent(event, markerId: number, markerPosition: [number, number], annotation)
+    handleMarkerEvent(event, markerId: number, markerPosition: [number, number], annotation)
     //================================================================================
     {
         if (['mousemove', 'click'].includes(event.type)) {
 
             // Remove any tooltips
             this.#removeTooltip()
-
-            if (['mouseenter', 'mousemove', 'click'].includes(event.type)) {
-                // The marker's feature
-                const feature = this.mapFeature(annotation.featureId)
-                if (feature) {
-                    if (event.type === 'mouseenter') {
-                        // Highlight on mouse enter
-                        this.#resetActiveFeatures()
-                        this.activateFeature(feature)
-                    } else {
-                        this.#selectActiveFeatures(event)
-                    }
+        }
+        if (['mouseenter', 'mousemove', 'click'].includes(event.type)) {
+            // The marker's feature
+            const feature = this.mapFeature(annotation.featureId)
+            if (feature) {
+                if (event.type === 'mouseenter') {
+                    // Highlight on mouse enter
+                    this.#resetActiveFeatures()
+                    this.activateFeature(feature)
+                } else if (event.type === 'click') {
+                    // This though selects active features which might not be the feature
+                    // that the marker is for, i.e. `feature`
+                    this.#selectActiveFeatures(event)
                 }
-                // Show tooltip
-                const html = this.#tooltipHtml(annotation, true)
-                this.#showToolTip(html, new maplibregl.LngLat(...markerPosition))
-
-                // Send marker event message
-                this.#flatmap.markerEvent(event.type, markerId, annotation)
             }
+            // Show tooltip
+            const html = this.#tooltipHtml(annotation, true)
+            this.#showToolTip(html, new maplibregl.LngLat(...markerPosition))
+
+            // Send marker event message
+            this.#flatmap.markerEvent(event.type, markerId, annotation)
         }
     }
 
