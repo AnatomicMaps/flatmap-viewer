@@ -286,6 +286,7 @@ export interface FlatMapMetadata
 export interface FlatMapFeatureAnnotation
 {
     id?: string
+    uri?: string
     alert?: string
     'anatomical-nodes'?: string[]
     bounds?: BoundingBox

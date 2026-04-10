@@ -225,6 +225,7 @@ export class FlatMap
     #exportedFeatureProperties: string[]
     #featurePropertyValues = new Map()
     #id: string
+    #featureUriToGeojsonIds: FeatureIdMap = new Map()
     #initialState: FlatMapState|null = null
     #layers: FlatMapLayer[]
     #idToAnnotation: Map<GeoJSONId, FlatMapFeatureAnnotation> = new Map()
@@ -284,6 +285,9 @@ export class FlatMap
         }
 
         for (const [featureId, annotation] of Object.entries(mapDescription.annotations)) {
+            if (annotation.id && !annotation.uri) {
+                annotation.uri = this.#makeServerId(annotation.id)
+            }
             this.#saveAnnotation(+featureId, annotation)
             this.#searchIndex.indexMetadata(+featureId, annotation)
         }
@@ -760,6 +764,19 @@ export class FlatMap
         }
     }
 
+    #makeServerId(id: string, resource=SERVER_FLATMAP_RESOURCE): string
+    //=================================================================
+    {
+        if (id.startsWith('http://') || id.startsWith('https://')) {
+            return id
+        } else if (id.startsWith('#')) {
+            // We don't want embedded `{` and `}` characters escaped
+            return `${this.#baseUrl}${resource}${this.#uuid}${id}`
+        } else {
+            return `${this.#baseUrl}${resource}${this.#uuid}#${id}`
+        }
+    }
+
     makeServerUrl(url, resource=SERVER_FLATMAP_RESOURCE): string
     //==========================================================
     {
@@ -1012,6 +1029,7 @@ export class FlatMap
         ann.featureId = featureId
         this.#idToAnnotation.set(+featureId, ann)
         this.#updateFeatureIdMap('dataset', this.#datasetToFeatureIds, ann)
+        this.#updateFeatureIdMap('uri', this.#featureUriToGeojsonIds, ann)
         this.#updateFeatureIdMap('models', this.#modelToFeatureIds, ann)
         this.#updateFeatureIdMap('source', this.#mapSourceToFeatureIds, ann)
         this.#updateFeatureIdMap('taxons', this.#taxonToFeatureIds, ann, UNCLASSIFIED_TAXON_ID)
@@ -1602,6 +1620,38 @@ export class FlatMap
                         markerIds.push(markerId)
                     }
                 }
+            }
+        }
+        return markerIds
+    }
+
+    /**
+     * Add a marker for a feature to the map.
+     *
+     * @param featureUri  The URI of the feature on which to place the marker.
+     * @param options     Configurable options for the marker.
+     * @return            The identifiers for the resulting markers. An empty array is returned if the
+     *                    map doesn't contain a feature with the URI
+     *
+     * @group Markers
+     */
+    addMarkerByFeatureUri(featureUri: string, options: FlatMapMarkerOptions={}): GeoJSONId[]
+    //======================================================================================
+    {
+        const markerIds: GeoJSONId[] = []
+        if (this.#userInteractions !== null) {
+            const featureIds = this.#featureUriToGeojsonIds.get(featureUri)
+            let markerId = -1
+            if (featureIds) {
+                for (const featureId of featureIds) {
+                    markerId = this.#userInteractions.addMarkerForFeature(featureId, markerId, options)
+                    if (markerId > -1) {
+                        markerIds.push(markerId)
+                    }
+                }
+            }
+            if (markerId === -1) {
+                console.warn(`Unable to find feature '${featureUri}' on which to place marker`)
             }
         }
         return markerIds
