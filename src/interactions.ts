@@ -198,6 +198,8 @@ export class UserInteractions
     #taxonFacet: TaxonFacet
     #tooltip: maplibregl.Popup|null = null
     #resetOnClickEnabled: boolean = true
+    #collectingActiveFeatures: boolean = false
+    #nextActiveFeatures: Map<GeoJSONId, MapFeature>|null = null
 
     constructor(flatmap: FlatMap)
     {
@@ -817,9 +819,18 @@ export class UserInteractions
     //==========================================================
     {
         if (feature) {
-            this.#setFeatureState(feature, { active: true })
-            if (!this.#activeFeatures.has(+feature.id)) {
-                this.#activeFeatures.set(+feature.id, feature)
+            const activeMap = this.#collectingActiveFeatures ? this.#nextActiveFeatures
+                                                             : this.#activeFeatures
+            if (activeMap && activeMap.has(+feature.id)) {
+                return
+            }
+            if (this.#collectingActiveFeatures) {
+                this.#nextActiveFeatures?.set(+feature.id, feature)
+            } else {
+                this.#setFeatureState(feature, { active: true })
+                if (!this.#activeFeatures.has(+feature.id)) {
+                    this.#activeFeatures.set(+feature.id, feature)
+                }
             }
             // If the feature is a nerve, activate its inner features too
             for (const innerFeatureId of this.#flatmap.featureIdsByNerveId(+feature.id)) {
@@ -842,6 +853,35 @@ export class UserInteractions
         }
     }
 
+    #beginActiveFeatureUpdate()
+    //=========================
+    {
+        this.#collectingActiveFeatures = true
+        this.#nextActiveFeatures = new Map()
+    }
+
+    #commitActiveFeatureUpdate()
+    //==========================
+    {
+        const nextActiveFeatures = this.#nextActiveFeatures || new Map()
+
+        for (const [featureId, feature] of this.#activeFeatures.entries()) {
+            if (!nextActiveFeatures.has(featureId)) {
+                this.#removeFeatureState(feature, 'active')
+            }
+        }
+
+        for (const [featureId, feature] of nextActiveFeatures.entries()) {
+            if (!this.#activeFeatures.has(featureId)) {
+                this.#setFeatureState(feature, { active: true })
+            }
+        }
+
+        this.#activeFeatures = nextActiveFeatures
+        this.#collectingActiveFeatures = false
+        this.#nextActiveFeatures = null
+    }
+
     #resetActiveFeatures()
     //====================
     {
@@ -849,6 +889,8 @@ export class UserInteractions
             this.#removeFeatureState(feature, 'active')
         }
         this.#activeFeatures.clear()
+        this.#collectingActiveFeatures = false
+        this.#nextActiveFeatures = null
     }
 
     /* UNUSED
@@ -1174,8 +1216,8 @@ export class UserInteractions
     {
         const features = this.#layerManager.featuresAtPoint(point)
         return features.filter(feature => {
-            const featureId = feature.properties?.featureId
-            return this.#featureIdIsRenderable(featureId)
+            const featureId = feature.properties?.featureId ?? feature.id
+            return this.#featureIdIsRenderable(+featureId)
         })
     }
 
@@ -1193,8 +1235,10 @@ export class UserInteractions
             const featureId: number = feature.id ? +feature.id
                                                     : +feature.properties.featureId
 
-            const minzoom = feature.properties?.minzoom
-            const maxzoom = feature.properties?.maxzoom
+            const minzoomRaw = Number(feature.properties?.minzoom)
+            const maxzoomRaw = Number(feature.properties?.maxzoom)
+            const minzoom = Number.isFinite(minzoomRaw) ? minzoomRaw : null
+            const maxzoom = Number.isFinite(maxzoomRaw) ? maxzoomRaw : null
 
             const ranges = rangesByFeatureId.get(featureId) || []
             ranges.push([minzoom, maxzoom])
@@ -1224,7 +1268,8 @@ export class UserInteractions
         }
 
         return ranges.some(([minzoom, maxzoom]) =>
-            zoom >= minzoom && zoom <= maxzoom
+            (minzoom == null || zoom >= minzoom)
+         && (maxzoom == null || zoom <= maxzoom)
         )
     }
 
@@ -1246,8 +1291,13 @@ export class UserInteractions
             return
         }
 
-        // Remove tooltip, reset active features, etc
-        this.#resetFeatureDisplay()
+        if (this.#map.isMoving()) {
+            return
+        }
+
+        // Remove tooltip and reset cursor; active features are updated by diff.
+        this.#removeTooltip()
+        this.#map.getCanvas().style.cursor = 'default'
 
         // Reset any info display
         const displayInfo = (this.#infoControl?.active)
@@ -1256,12 +1306,14 @@ export class UserInteractions
         }
 
         const eventLngLat = this.#map.unproject(eventPoint)
+        this.#beginActiveFeatureUpdate()
 
         // Get all the features at the current point
         const features = this.#renderedFeatures(eventPoint)
         if (features.length === 0) {
             this.#lastFeatureMouseEntered = null
             this.#lastFeatureModelsMouse = null
+            this.#commitActiveFeatureUpdate()
             if (this.#flatmap.options.showCoords || this.#flatmap.options.showLngLat) {
                 this.#showToolTip('', eventLngLat, null)
             }
@@ -1377,6 +1429,8 @@ export class UserInteractions
                 }
             }
         }
+
+        this.#commitActiveFeatureUpdate()
 
         if (info !== '') {
             this.#infoControl.show(info)
