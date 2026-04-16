@@ -83,14 +83,18 @@ const NERVE_SELECTED = 'black'
 
 //==============================================================================
 
-const STROKE_INTERPOLATION: ExpressionSpecification = [
-    'interpolate',
-    ['exponential', 2],
-    ['zoom'],
-     2, ["*", ['var', 'width'], ["^", 2,  0.5]],
-     7, ["*", ['var', 'width'], ["^", 2,  1.5]],
-     9, ["*", ['var', 'width'], ["^", 2,  2.0]]
-]
+function uniformZoomScaling(expression): ExpressionSpecification {
+    return [
+        'let', 'unscaled', expression,
+        [
+            'interpolate',
+            ['exponential', 2],
+            ['zoom'],
+            2, ["*", ['var', 'unscaled'], ["^", 2, -2]],
+            12, ["*", ['var', 'unscaled'], ["^", 2, 8]]
+        ]
+    ]
+}
 
 //==============================================================================
 
@@ -516,24 +520,21 @@ export class FeatureLineLayer extends VectorStyleLayer
                     ['boolean', ['feature-state', 'active'], false], 1.0,
                     0.3
                 ],
-            'line-width': [
-                'let',
-                'width',  [
+            'line-width': uniformZoomScaling(
+                [
                     '*',
-                        ['case',
-                            ['has', 'stroke-width'], ['get', 'stroke-width'],
-                            1.0
-                        ],
-                        ['case',
-                            ['boolean', ['feature-state', 'selected'], false], 1,
-                            ['boolean', ['feature-state', 'active'], false], 1,
-                            options.authoring ? 0.7 : 0.5
-                        ]
+                    ['case',
+                        ['has', 'stroke-width'], ['get', 'stroke-width'],
+                        1.0
                     ],
-                    STROKE_INTERPOLATION
-            ]
-            // Need to vary width based on zoom??
-            // Or opacity??
+                    ['case',
+                        ['boolean', ['feature-state', 'selected'], false], 1,
+                        ['boolean', ['feature-state', 'active'], false], 1,
+                        options.authoring ? 0.7 : 0.5
+                    ]
+                ]
+            ),
+            // Need to vary opacity based on zoom??
         }
         if (this.#dashed) {
             paintStyle['line-dasharray'] = [3, 2]
@@ -627,10 +628,9 @@ export class AnnotatedPathLayer extends VectorStyleLayer
                         ((exclude || dimmed) ? 0.05 : 0.8),
                     0.6
                 ],
-            'line-width': [
-                'let',
-                'width',
-                    ['case',
+            'line-width': uniformZoomScaling(
+                [
+                    'case',
                     ['boolean', ['feature-state', 'hidden'], false], 0.0,
                     ['boolean', ['feature-state', 'annotated'], false],
                         exclude ? 0.0 : (['*', 1.1, ['case',
@@ -639,9 +639,9 @@ export class AnnotatedPathLayer extends VectorStyleLayer
                             ['boolean', ['feature-state', 'active'], false], 1.1,
                             1.0]]),
                         0.0
-                    ],
-                STROKE_INTERPOLATION
-            ]
+
+                ]
+            )
         }
         return super.changedPaintStyle(paintStyle, changes)
     }
@@ -723,9 +723,8 @@ export class PathLineLayer extends VectorStyleLayer
                     ['boolean', ['feature-state', 'active'], false], 0.0,
                 dimmed ? 0.1 : 0.8
             ],
-            'line-width': [
-                'let',
-                'width', [
+            'line-width': uniformZoomScaling(
+                [
                     "*",
                     this.#highlight ? ['case',
                         ['boolean', ['feature-state', 'selected'], false], [
@@ -745,9 +744,8 @@ export class PathLineLayer extends VectorStyleLayer
                     ],
                     ['case', ['boolean', ['feature-state', 'annotated'], false], (exclude ? 0.0 : 1.0), 1.0],
                     ['case', ['has', 'stroke-width'], ['get', 'stroke-width'], 1.0]
-                ],
-                STROKE_INTERPOLATION
-            ]
+                ]
+            )
         }
         if (this.#dashed) {
             paintStyle['line-dasharray'] = [1, 1]
@@ -839,14 +837,8 @@ class NerveCentrelineLayer extends VectorStyleLayer
                     ['boolean', ['feature-state', 'active'], false], 1.0,
                 (this.#type == 'edge') ? 0.4 : 0.7
             ],
-            'line-width': [
-                'let',
-                'width',
-                    (this.#type == 'edge') ? 4 : 3,
-                    STROKE_INTERPOLATION
-            ]
-            // Need to vary width based on zoom??
-            // Or opacity??
+            'line-width': uniformZoomScaling((this.#type === 'edge') ? 4 : 3)
+            // Need to vary opacity based on zoom??
         }
         return super.changedPaintStyle(paintStyle, changes)
     }
@@ -950,15 +942,10 @@ export class CentrelineNodeBorderLayer extends VectorStyleLayer
     {
         const showNodes = options.showNerveCentrelines || false
         const paintStyle: PaintSpecification = {
-                'line-color': '#000',
-                'line-opacity': showNodes ? 0.1 : 0,
-                'line-width': [
-                    'let',
-                    'width',
-                        0.2,
-                        STROKE_INTERPOLATION
-                ]
-            }
+            'line-color': '#000',
+            'line-opacity': showNodes ? 0.1 : 0,
+            'line-width': uniformZoomScaling(0.2)
+        }
         return super.changedPaintStyle(paintStyle, changes)
     }
 
