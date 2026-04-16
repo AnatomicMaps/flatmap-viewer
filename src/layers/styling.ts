@@ -64,6 +64,7 @@ export interface StylingOptions extends StyleLayerOptions
     hasImageLayers?: boolean
     opacity?: number
     showNerveCentrelines?: boolean
+    hidePaths?: boolean
 }
 
 //==============================================================================
@@ -197,7 +198,7 @@ export class VectorStyleLayer extends StyleLayer
         this.#lastPaintStyle = {}
     }
 
-    defaultFilter(): ExpressionFilterSpecification
+    defaultFilter(_options: StylingOptions={}): ExpressionFilterSpecification
     {
         return null
     }
@@ -594,6 +595,31 @@ function sckanFilter(options: StylingOptions={}): ExpressionFilterSpecification
     }
 }
 
+function zoomBoundCaseExpression(zoomValue: number, inRangeOpacity: number, outOfRangeOpacity: number): any
+{
+    const expression: any[] = ['case']
+    expression.push(['==', ['get', 'type'], 'bezier'], 1.0)
+    expression.push(['==', ['get', 'kind'], 'error'], 1.0)
+    expression.push(['boolean', ['feature-state', 'selected'], false], 0.0)
+    expression.push(['boolean', ['feature-state', 'active'], false], 0.0)
+    expression.push(['<', zoomValue, ['to-number', ['coalesce', ['get', 'minzoom'], 0], 0]], outOfRangeOpacity)
+    expression.push(['>', zoomValue, ['to-number', ['coalesce', ['get', 'maxzoom'], 24], 24]], outOfRangeOpacity)
+    expression.push(inRangeOpacity)
+    return expression
+}
+
+function extentOpacityExpression(dimmed: boolean, normalOpacity: number, fadedOpacity: number): any
+{
+    const inRangeOpacity = dimmed ? fadedOpacity : normalOpacity
+    const expression: any[] = ['step', ['zoom'],
+        zoomBoundCaseExpression(0, inRangeOpacity, fadedOpacity)]
+    for (let step = 1; step <= 24; step++) {
+        expression.push(step)
+        expression.push(zoomBoundCaseExpression(step, inRangeOpacity, fadedOpacity))
+    }
+    return expression
+}
+
 //==============================================================================
 
 export class AnnotatedPathLayer extends VectorStyleLayer
@@ -715,14 +741,7 @@ export class PathLineLayer extends VectorStyleLayer
                     ['boolean', ['feature-state', 'selected'], false], 1.0,
                     ['boolean', ['feature-state', 'active'], false], 1.0,
                 0.0
-            ] : [
-                'case',
-                    ['==', ['get', 'type'], 'bezier'], 1.0,
-                    ['==', ['get', 'kind'], 'error'], 1.0,
-                    ['boolean', ['feature-state', 'selected'], false], 0.0,
-                    ['boolean', ['feature-state', 'active'], false], 0.0,
-                dimmed ? 0.1 : 0.8
-            ],
+            ] :extentOpacityExpression(dimmed, 0.8, 0.1),
             'line-width': [
                 'let',
                 'width', [
