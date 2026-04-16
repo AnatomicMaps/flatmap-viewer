@@ -1352,3 +1352,65 @@ export class RasterStyleLayer extends StyleLayer
 }
 
 //==============================================================================
+//==============================================================================
+
+export class HighlightVariablesLayer extends VectorStyleLayer
+{
+    constructor(id: string, sourceLayer: string)
+    {
+        super(id, 'variables', sourceLayer)
+    }
+
+    defaultFilter(): ExpressionFilterSpecification
+    {
+        return [
+            'all',
+            ['==', ['geometry-type'], 'Polygon'],
+            ['!', ['has', 'node']]
+        ]
+    }
+
+    paintStyle(_options: StylingOptions, changes=false)
+    {
+        return super.changedPaintStyle(<PaintSpecification>{
+            'line-color': '#00FF00',
+            'line-opacity': [
+                'case',
+                [
+                    'all',
+                    ['boolean', ['feature-state', 'active'], false],
+                    [
+                        'any',
+                        ['has', 'variable'],
+                        [
+                            'all',
+                            ['has', 'associatedVariables'],
+                            ['!=',
+                                ['coalesce',
+                                    ['at', 0, ['get', 'associatedVariables']],
+                                    ''
+                                ],
+                                ''
+                            ]
+                        ]
+                    ]
+                ], 0.9,
+                0.0
+            ],
+            'line-width': uniformZoomScaling(4)
+        }, changes)
+    }
+
+    style(layer: FlatMapLayer, options: StylingOptions): LineLayerSpecification
+    {
+        return {
+            ...super.style(layer),
+            'type': 'line',
+            'filter': this.defaultFilter(),
+            'paint': this.paintStyle(options) as LinePaintSpecification
+        }
+    }
+}
+
+//==============================================================================
+//==============================================================================
