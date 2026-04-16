@@ -172,6 +172,7 @@ export class UserInteractions
     #currentPopup: maplibregl.Popup|null = null
     #featureEnabledCount: Map<GeoJSONId, number>
     #featureIdToMapId: Map<string, GeoJSONId>
+    #featureZoomRangesBySourceLayer: Map<string, Map<GeoJSONId, Array<[number|null, number|null]>>> = new Map()
     #flatmap: FlatMap
     #imageLayerIds = new Map()
     #infoControl: InfoControl|null = null
@@ -1172,7 +1173,59 @@ export class UserInteractions
     //===========================================================
     {
         const features = this.#layerManager.featuresAtPoint(point)
-        return features.filter(feature => this.#featureEnabled(feature))
+        return features.filter(feature => {
+            const featureId = feature.properties?.featureId
+            return this.#featureIdIsRenderable(featureId)
+        })
+    }
+
+    #cacheSourceLayerFeatureZoomRanges(sourceLayer: string)
+    //===============================================
+    {
+        if (this.#featureZoomRangesBySourceLayer.has(sourceLayer)) {
+            return
+        }
+
+        const rangesByFeatureId = new Map<GeoJSONId, Array<[number|null, number|null]>>()
+        const features = this.#map.querySourceFeatures(VECTOR_TILES_SOURCE, {sourceLayer})
+
+        for (const feature of features) {
+            const featureId: number = feature.id ? +feature.id
+                                                    : +feature.properties.featureId
+
+            const minzoom = feature.properties?.minzoom
+            const maxzoom = feature.properties?.maxzoom
+
+            const ranges = rangesByFeatureId.get(featureId) || []
+            ranges.push([minzoom, maxzoom])
+            rangesByFeatureId.set(featureId, ranges)
+        }
+
+        this.#featureZoomRangesBySourceLayer.set(sourceLayer, rangesByFeatureId)
+    }
+
+    #featureIdIsRenderable(featureId: GeoJSONId): boolean
+    //===================================================
+    {
+        const zoom = Math.floor(this.#map.getZoom())
+        const mapFeature = this.mapFeature(+featureId)
+        if (!this.#featureEnabled(mapFeature)) {
+            return false
+        }
+        if (mapFeature === null || !mapFeature.sourceLayer) {
+            return false
+        }
+
+        this.#cacheSourceLayerFeatureZoomRanges(mapFeature.sourceLayer)
+        const rangesByFeatureId = this.#featureZoomRangesBySourceLayer.get(mapFeature.sourceLayer)
+        const ranges = rangesByFeatureId?.get(+featureId)
+        if (!ranges || ranges.length === 0) {
+            return false
+        }
+
+        return ranges.some(([minzoom, maxzoom]) =>
+            zoom >= minzoom && zoom <= maxzoom
+        )
     }
 
     #mouseMoveEvent(event)
@@ -1504,12 +1557,16 @@ export class UserInteractions
                 this.activateFeature(this.mapFeature(+nerveId))
             }
             for (const featureId of this.#pathManager.nerveFeatureIds(nerveId)) {
-                this.activateFeature(this.mapFeature(+featureId))
+                if (this.#featureIdIsRenderable(+featureId)) {
+                    this.activateFeature(this.mapFeature(+featureId))
+                }
             }
         }
         if ('nodeId' in feature.properties) {
             for (const featureId of this.#pathManager.pathFeatureIds(+feature.properties.nodeId)) {
-                this.activateFeature(this.mapFeature(featureId))
+                if (this.#featureIdIsRenderable(+featureId)) {
+                    this.activateFeature(this.mapFeature(+featureId))
+                }
             }
         }
     }
@@ -1923,6 +1980,7 @@ export class UserInteractions
         }
 
         if (type === 'zoomend') {
+            this.#featureZoomRangesBySourceLayer.clear()
             if (this.#lastMousePoint !== null) {
                 if ('originalEvent' in event) {
                     if ('layerX' in event.originalEvent && 'layerY' in event.originalEvent) {
@@ -1932,7 +1990,6 @@ export class UserInteractions
                         ])
                     }
                 }
-                this.#layerManager.zoomEvent()
             }
         }
     }
