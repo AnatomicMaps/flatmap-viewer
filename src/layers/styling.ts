@@ -64,7 +64,6 @@ export interface StylingOptions extends StyleLayerOptions
     hasImageLayers?: boolean
     opacity?: number
     showNerveCentrelines?: boolean
-    hidePaths?: boolean
 }
 
 //==============================================================================
@@ -198,7 +197,7 @@ export class VectorStyleLayer extends StyleLayer
         this.#lastPaintStyle = {}
     }
 
-    defaultFilter(_options: StylingOptions={}): ExpressionFilterSpecification
+    defaultFilter(): ExpressionFilterSpecification
     {
         return null
     }
