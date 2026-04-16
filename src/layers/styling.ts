@@ -821,7 +821,7 @@ class NerveCentrelineLayer extends VectorStyleLayer
     paintStyle(_options: StylingOptions, changes=false)
     {
         const paintStyle: PaintSpecification = {
-            'line-color': (this.#type == 'edge') ? [
+            'line-color': (this.#type === 'edge') ? [
                 'case', ['all',
                     ['boolean', ['feature-state', 'active'], false],
                     ['boolean', ['feature-state', 'selected'], false]
@@ -837,7 +837,7 @@ class NerveCentrelineLayer extends VectorStyleLayer
                 'case',
                     ['boolean', ['feature-state', 'selected'], false], 1.0,
                     ['boolean', ['feature-state', 'active'], false], 1.0,
-                (this.#type == 'edge') ? 0.4 : 0.7
+                (this.#type === 'edge') ? 0.4 : 0.7
             ],
             'line-width': uniformZoomScaling((this.#type === 'edge') ? 4 : 3)
             // Need to vary opacity based on zoom??
