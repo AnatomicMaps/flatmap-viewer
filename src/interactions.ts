@@ -180,6 +180,7 @@ export class UserInteractions
     #lastFeatureModelsMouse: string|null = null
     #lastImageId: number = 0
     #lastMarkerId: number = 900000
+    #lastMousePoint: [number, number]|null = null
     #layerManager: LayerManager
     #map: maplibregl.Map
     #markerIdByFeatureId = new Map()
@@ -354,6 +355,7 @@ export class UserInteractions
         // Handle pan/zoom events
         this.#map.on('move', this.#panZoomEvent.bind(this, 'pan'))
         this.#map.on('zoom', this.#panZoomEvent.bind(this, 'zoom'))
+        this.#map.on('zoomend', this.#panZoomEvent.bind(this, 'zoomend'))
     }
 
     get minimap()
@@ -1176,6 +1178,10 @@ export class UserInteractions
     #mouseMoveEvent(event)
     //====================
     {
+        this.#lastMousePoint = event.point
+        if (this.#map.isMoving()) {
+            return
+        }
         this.#updateActiveFeature(event.point, event.lngLat)
     }
 
@@ -1913,15 +1919,21 @@ export class UserInteractions
             this.#flatmap.panZoomEvent(type)
         }
         if (type === 'zoom') {
-            if ('originalEvent' in event) {
-                if ('layerX' in event.originalEvent && 'layerY' in event.originalEvent) {
-                    this.#updateActiveFeature([
-                        event.originalEvent.layerX,
-                        event.originalEvent.layerY
-                    ])
-                }
-            }
             this.#layerManager.zoomEvent()
+        }
+
+        if (type === 'zoomend') {
+            if (this.#lastMousePoint !== null) {
+                if ('originalEvent' in event) {
+                    if ('layerX' in event.originalEvent && 'layerY' in event.originalEvent) {
+                        this.#updateActiveFeature([
+                            event.originalEvent.layerX,
+                            event.originalEvent.layerY
+                        ])
+                    }
+                }
+                this.#layerManager.zoomEvent()
+            }
         }
     }
 
