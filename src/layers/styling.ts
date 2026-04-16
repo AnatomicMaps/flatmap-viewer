@@ -447,15 +447,17 @@ export class FeatureBorderLayer extends VectorStyleLayer
         width.push(['boolean', ['feature-state', 'annotated'], false], 3.5)
         width.push(['has', 'colour'], 0.7)
         width.push(functional ? 1 : outlined ? 0.5 : 0.1)
-        const lineWidth = [
-            '*',
-            ['case',
-                ['has', 'stroke-width'], ['get', 'stroke-width'],
-                1.0
-            ],
-            width
-        ]
-
+        const lineWidth = uniformZoomScaling(
+            [
+                '*',
+                ['case',
+                    ['has', 'stroke-width'], ['get', 'stroke-width'],
+                    1.0
+                ],
+                0.7,
+                width
+            ]
+        )
         return super.changedPaintStyle(<PaintSpecification>{
             'line-color': lineColour,
             'line-opacity': lineOpacity,
