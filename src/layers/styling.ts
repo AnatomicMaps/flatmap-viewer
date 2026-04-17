@@ -440,9 +440,9 @@ export class FeatureBorderLayer extends VectorStyleLayer
 
         const width: CaseSpecification = ['case']
         width.push(['boolean', ['get', 'invisible'], false], 0.2)
-        width.push(['boolean', ['feature-state', 'selected'], false], functional ? 3 : 1.5)
+        width.push(['boolean', ['feature-state', 'selected'], false], 2)
         if (outlined) {
-            width.push(['boolean', ['feature-state', 'active'], false], functional ? 2.5 : 1.5)
+            width.push(['boolean', ['feature-state', 'active'], false], 1.5)
         }
         width.push(['boolean', ['feature-state', 'annotated'], false], 3.5)
         width.push(['has', 'colour'], 0.7)
@@ -1394,10 +1394,10 @@ export class HighlightVariablesLayer extends VectorStyleLayer
                             ]
                         ]
                     ]
-                ], 0.9,
+                ], 0.6,
                 0.0
             ],
-            'line-width': uniformZoomScaling(4)
+            'line-width': uniformZoomScaling(8)
         }, changes)
     }
 
