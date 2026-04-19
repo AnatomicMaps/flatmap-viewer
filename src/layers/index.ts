@@ -165,6 +165,8 @@ class FlatMapStylingLayer
                 }
                 if (options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL) {
                     this.#addVectorStyleLayer(style.FeatureZoomPointLayer, FEATURES_LAYER)
+                }
+                if (flatmap.mapMetadata['map-kinds']?.includes('model')) {
                     this.#addVectorStyleLayer(style.HighlightVariablesLayer, FEATURES_LAYER)
                 }
             }
