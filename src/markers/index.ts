@@ -91,7 +91,8 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         svg: CLUSTERED_MARKER_SVG,
         options: {
             color: '#EE5900',
-            secondaryColor: '#fff'
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {
@@ -99,7 +100,8 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         svg: CLUSTERED_MARKER_SVG,
         options: {
             color: '#11a6ff',
-            secondaryColor: '#fff'
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {
@@ -107,7 +109,8 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         svg: UNCLUSTERED_MARKER_SVG,
         options: {
             color: '#11a6ff',
-            secondaryColor: '#fff'
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {
@@ -115,7 +118,8 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         svg: UNCLUSTERED_MARKER_SVG,
         options: {
             color: '##005974',
-            secondaryColor: '#fff'
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {

@@ -31,6 +31,8 @@ import {DATASET_CLUSTERED_MARKER, UNCLUSTERED_MARKER,
         MULTISCALE_CLUSTERED_MARKER, MULTISCALE_MARKER} from '../markers'
 import {PropertiesType} from '../types'
 
+import { markerZoomScaling } from './styling'
+
 //==============================================================================
 
 type MarkerProperties = {
@@ -100,14 +102,14 @@ export class MarkerLayer
                 ],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
-                'icon-offset': [0, -17],
-                'icon-size': 0.8,
+                'icon-offset': [0, -30],
+                'icon-size': markerZoomScaling(0.2),
                 'text-field': ['case',
                                     ['get', 'cluster'], ['get', 'count'],
                                     ['>', ['get', 'count'], 1], ['get', 'count'],
                                 ''],
-                'text-size': 10,
-                'text-offset': [0, -1.93],
+                'text-size': markerZoomScaling(10),
+                'text-offset': [0, -0.71],
                 'text-allow-overlap': true,
                 'text-ignore-placement': true,
             },
