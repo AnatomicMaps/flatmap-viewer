@@ -25,6 +25,7 @@ import {SvgManager, SvgTemplateManager} from '../../thirdParty/maplibre-gl-svg/s
 //==============================================================================
 
 export const MARKER_DEFAULT_COLOUR = '#005974'
+const MULTISCALE_MARKER_COLOUR = '#11a6ff'
 
 //==============================================================================
 
@@ -99,7 +100,7 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         id: MULTISCALE_CLUSTERED_MARKER,
         svg: CLUSTERED_MARKER_SVG,
         options: {
-            color: '#11a6ff',
+            color: MULTISCALE_MARKER_COLOUR,
             secondaryColor: '#fff',
             scale: 10
         }
@@ -108,7 +109,7 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         id: MULTISCALE_MARKER,
         svg: UNCLUSTERED_MARKER_SVG,
         options: {
-            color: '#11a6ff',
+            color: MULTISCALE_MARKER_COLOUR,
             secondaryColor: '#fff',
             scale: 10
         }
