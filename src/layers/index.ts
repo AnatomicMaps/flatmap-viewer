@@ -442,7 +442,7 @@ export class LayerManager
     #layerOptions: StylingOptions
     #map: MapLibreMap
     #mapStyleLayers: Map<string, FlatMapStylingLayer> = new Map()
-    #markerLayer: ClusteredAnatomicalMarkerLayer
+    #clusteredAnatomicalMarkerLayer: ClusteredAnatomicalMarkerLayer
     #minimapStyleSpecification: maplibregl.StyleSpecification
 //    #modelLayer
     #revertDetailZoom: number = -1
@@ -482,7 +482,7 @@ export class LayerManager
         }
 
         // Show anatomical clustered markers in a layer
-        this.#markerLayer = new ClusteredAnatomicalMarkerLayer(flatmap, ui)
+        this.#clusteredAnatomicalMarkerLayer = new ClusteredAnatomicalMarkerLayer(flatmap, ui)
 
         // We use ``deck.gl`` for some layers
         this.#deckGlOverlay = new DeckGlOverlay(flatmap)
@@ -543,10 +543,10 @@ export class LayerManager
         //this.#markerLayer.clearMarkers()
     }
 
-    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
-    //=========================================================
+    addClusteredAnatomicalMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=====================================================================
     {
-        return this.#markerLayer.addDatasetMarkers(datasets)
+        return this.#clusteredAnatomicalMarkerLayer.addClusteredMarkers(datasets)
     }
 
     addLayeredMarker(annotation: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions): GeoJSONId|null
@@ -563,22 +563,22 @@ export class LayerManager
         return null
     }
 
-    clearDatasetMarkers()
-    //===================
+    clearClusteredAnatomicalMarkers()
+    //===============================
     {
-        this.#markerLayer.clearDatasetMarkers()
+        this.#clusteredAnatomicalMarkerLayer.clearClusteredMarkers()
     }
 
     datasetTerms(term: string): DatasetMarkerResult[]
     //===============================================
     {
-        return this.#markerLayer.datasetTerms(term)
+        return this.#clusteredAnatomicalMarkerLayer.datasetTerms(term)
     }
 
-    removeDatasetMarker(datasetId: string)
-    //====================================
+    removeClusteredAnatomicalMarker(datasetId: string)
+    //================================================
     {
-        this.#markerLayer.removeDatasetMarker(datasetId)
+        this.#clusteredAnatomicalMarkerLayer.removeClusteredMarker(datasetId)
     }
 
     featuresAtPoint(point): MapPointFeature[]
@@ -599,14 +599,14 @@ export class LayerManager
     //===================================================
     {
         this.#flightPathLayer.removeFeatureState(featureId, key)
-        this.#markerLayer.removeFeatureState(featureId, key)
+        this.#clusteredAnatomicalMarkerLayer.removeFeatureState(featureId, key)
     }
 
     setFeatureState(featureId: GeoJSONId, state)
     //==========================================
     {
         this.#flightPathLayer.setFeatureState(featureId, state)
-        this.#markerLayer.setFeatureState(featureId, state)
+        this.#clusteredAnatomicalMarkerLayer.setFeatureState(featureId, state)
     }
 
     setPaint(options={})

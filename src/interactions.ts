@@ -1744,28 +1744,28 @@ export class UserInteractions
         }
     }
 
-    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
-    //=========================================================
+    addClusteredAnatomicalMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=====================================================================
     {
         if (this.#layerManager) {
-            return this.#layerManager.addDatasetMarkers(datasets)
+            return this.#layerManager.addClusteredAnatomicalMarkers(datasets)
         }
         return []
     }
 
-    clearDatasetMarkers()
-    //===================
+    clearClusteredAnatomicalMarkers()
+    //===============================
     {
         if (this.#layerManager) {
-            this.#layerManager.clearDatasetMarkers()
+            this.#layerManager.clearClusteredAnatomicalMarkers()
         }
     }
 
-    removeDatasetMarker(datasetId: string)
-    //====================================
+    removeClusteredAnatomicalMarker(datasetId: string)
+    //================================================
     {
         if (this.#layerManager) {
-            this.#layerManager.removeDatasetMarker(datasetId)
+            this.#layerManager.removeClusteredAnatomicalMarker(datasetId)
         }
     }
 
