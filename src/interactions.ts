@@ -1680,10 +1680,14 @@ export class UserInteractions
         if (markerPosition === null || annotation.kind === 'zoom-point') {
             return markerId
         }
+        if (!options?.colour && !options.element) {
+            return this.#layerManager.addLayeredMarker(annotation, options)
+        }
+
         // Only create a marker if there's not already one for the feature
         // NB. If several features have the same anatomical id then each will have
         //     a marker, all with the same marker id
-        if (!('marker' in annotation)) {
+        if (!('marker' in annotation)) {    // where is this set??
             if (markerId === -1) {
                 markerId = this.nextMarkerId()
             }
