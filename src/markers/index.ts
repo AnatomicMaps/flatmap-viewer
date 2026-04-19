@@ -117,7 +117,7 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         id: UNCLUSTERED_MARKER,
         svg: UNCLUSTERED_MARKER_SVG,
         options: {
-            color: '##005974',
+            color: MARKER_DEFAULT_COLOUR,
             secondaryColor: '#fff',
             scale: 10
         }
