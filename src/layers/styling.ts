@@ -84,7 +84,6 @@ const NERVE_SELECTED = 'black'
 
 //==============================================================================
 
-function uniformZoomScaling(expression): ExpressionSpecification {
 export function markerZoomScaling(expression: ExpressionSpecification|ExpressionType|number): DataDrivenPropertyValueSpecification<number> {
     return [
         'let', 'unscaled', expression,
@@ -98,6 +97,7 @@ export function markerZoomScaling(expression: ExpressionSpecification|Expression
     ]
 }
 
+export function uniformZoomScaling(expression: ExpressionSpecification|ExpressionType|number): DataDrivenPropertyValueSpecification<number> {
     return [
         'let', 'unscaled', expression,
         [
@@ -469,7 +469,7 @@ export class FeatureBorderLayer extends VectorStyleLayer
                     1.0
                 ],
                 0.7,
-                width
+                width as ExpressionSpecification
             ]
         )
         return super.changedPaintStyle(<PaintSpecification>{

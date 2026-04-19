@@ -18,7 +18,7 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Map as MapLibreMap} from 'maplibre-gl'
+import type {Map as MapLibreMap} from 'maplibre-gl'
 
 import {SvgManager, SvgTemplateManager} from '../../thirdParty/maplibre-gl-svg/src'
 

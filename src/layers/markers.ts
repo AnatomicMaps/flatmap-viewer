@@ -18,18 +18,16 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Map as MapLibreMap} from 'maplibre-gl'
-import {GeoJSONSource} from 'maplibre-gl'
+import type {GeoJSONSource, Map as MapLibreMap} from 'maplibre-gl'
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
-import {FlatMapFeatureAnnotation, FlatMapMarkerOptions} from '../flatmap-types'
-import type {GeoJSONId} from '../flatmap-types'
-import {UserInteractions} from '../interactions'
+import type {FlatMap} from '../flatmap'
+import type {FlatMapFeatureAnnotation, FlatMapMarkerOptions, GeoJSONId} from '../flatmap-types'
+import type {UserInteractions} from '../interactions'
 import {DATASET_CLUSTERED_MARKER, UNCLUSTERED_MARKER,
         MULTISCALE_CLUSTERED_MARKER, MULTISCALE_MARKER} from '../markers'
-import {PropertiesType} from '../types'
+import type {PropertiesType} from '../types'
 
 import { markerZoomScaling } from './styling'
 
@@ -75,7 +73,7 @@ export class MarkerLayer
 
     constructor(flatmap: FlatMap, ui: UserInteractions, layerId: string)
     {
-        this.#map = flatmap.map!
+        this.#map = flatmap.map
         this.#ui = ui
         this.#id = `${layerId}-markers-layer`
         this.#source = `${layerId}-markers-source`
