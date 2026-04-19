@@ -1384,7 +1384,7 @@ export class HighlightVariablesLayer extends VectorStyleLayer
         ]
     }
 
-    paintStyle(_options: StylingOptions, changes=false)
+    paintStyle(options: StylingOptions, changes=false)
     {
         return super.changedPaintStyle(<PaintSpecification>{
             'line-color': '#00FF00',
@@ -1411,7 +1411,7 @@ export class HighlightVariablesLayer extends VectorStyleLayer
                 ], 0.6,
                 0.0
             ],
-            'line-width': uniformZoomScaling(8)
+            'line-width': uniformZoomScaling(options.flatmapStyle === FLATMAP_STYLE.FUNCTIONAL ? 8 : 4)
         }, changes)
     }
 
