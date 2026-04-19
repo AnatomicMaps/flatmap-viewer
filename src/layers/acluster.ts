@@ -39,7 +39,7 @@ import { markerZoomScaling } from './styling'
 
 //==============================================================================
 
-export const ANATOMICAL_MARKERS_LAYER = 'anatomical-markers-layer'
+export const ANATOMICAL_MARKERS_LAYER = 'anatomical_-_markers-layer'
 const ANATOMICAL_MARKERS_SOURCE = 'anatomical-markers-source'
 
 //==============================================================================

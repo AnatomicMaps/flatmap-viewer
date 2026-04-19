@@ -48,6 +48,7 @@ import type {BoundingBox, DatasetTerms, FeatureZoomOptions, GeoJSONId} from './f
 import type {MinimapOptions, Point2D} from './flatmap-types'
 import {type FlatMap, FLATMAP_STYLE} from './flatmap'
 import {isMarker, LayerManager} from './layers'
+import {ANATOMICAL_MARKERS_LAYER} from './layers/acluster'
 import {VECTOR_TILES_SOURCE} from './layers/styling'
 import {MARKER_DEFAULT_COLOUR} from './markers'
 import {latex2Svg} from './mathjax'
@@ -1137,8 +1138,10 @@ export class UserInteractions
         let properties: FlatMapFeatureAnnotation
         if (isMarker(feature)) {
             const markerProperties: object = Object.assign({}, feature.properties, values)
-            const markerTerm = markerProperties['models']
-            markerProperties['dataset-terms'] = this.#layerManager.datasetTerms(markerTerm)
+            if (feature.layer.id === ANATOMICAL_MARKERS_LAYER) {
+                const markerTerm = markerProperties['models']
+                markerProperties['dataset-terms'] = this.#layerManager.datasetTerms(markerTerm)
+            }
             return this.#flatmap.markerEvent(type, +feature.id, markerProperties as FlatMapFeatureAnnotation)
         } else if ('properties' in feature) {
             properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation
