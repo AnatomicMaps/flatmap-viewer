@@ -332,8 +332,8 @@ export class ClusteredAnatomicalMarkerLayer
                 'text-ignore-placement': true,
             },
             paint: {
-                'icon-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 1],
-                'text-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 1]
+                'icon-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 0.8],
+                'text-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 0.8]
             }
         })
     }
