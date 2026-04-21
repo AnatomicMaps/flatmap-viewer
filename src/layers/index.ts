@@ -274,6 +274,12 @@ class FlatMapStylingLayer
         return markerId
     }
 
+    clearLayeredMarkers()
+    //===================
+    {
+        this.#markerLayer.clearMarkers()
+    }
+
     updateBaseMarker(baseFeature: FlatMapFeatureAnnotation, options: FlatMapMarkerOptions)
     //===================================================================================
     {
@@ -569,6 +575,14 @@ export class LayerManager
     //===============================
     {
         this.#clusteredAnatomicalMarkerLayer.clearClusteredMarkers()
+    }
+
+    clearLayeredMarkers()
+    //===================
+    {
+        for (const styleLayer of this.#mapStyleLayers.values()) {
+            styleLayer.clearLayeredMarkers()
+        }
     }
 
     datasetTerms(term: string): DatasetMarkerResult[]

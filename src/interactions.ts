@@ -1728,9 +1728,8 @@ export class UserInteractions
     clearMarkers()
     //============
     {
-        if (this.#layerManager) {
-            this.#layerManager.clearMarkers()
-        }
+        this.#layerManager.clearMarkers()
+        this.#layerManager.clearLayeredMarkers()
         for (const marker of this.#markerIdByMarker.keys()) {
             marker.remove()
         }
