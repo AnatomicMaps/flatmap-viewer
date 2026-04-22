@@ -63,6 +63,7 @@ export interface StylingOptions extends StyleLayerOptions
     dimmed?: boolean
     hasImageLayers?: boolean
     opacity?: number
+    pathLowDensityMode?: boolean
     showNerveCentrelines?: boolean
 }
 
@@ -607,14 +608,16 @@ function zoomBoundCaseExpression(zoomValue: number, inRangeOpacity: number, outO
     return expression
 }
 
-function extentOpacityExpression(dimmed: boolean, normalOpacity: number, fadedOpacity: number): any
+function extentOpacityExpression(dimmed: boolean, normalOpacity: number, fadedOpacity: number,
+                                 pathLowDensityMode=false): any
 {
     const inRangeOpacity = dimmed ? fadedOpacity : normalOpacity
+    const outOfRangeOpacity = pathLowDensityMode ? inRangeOpacity : fadedOpacity
     const expression: any[] = ['step', ['zoom'],
-        zoomBoundCaseExpression(0, inRangeOpacity, fadedOpacity)]
+        zoomBoundCaseExpression(0, inRangeOpacity, outOfRangeOpacity)]
     for (let step = 1; step <= 24; step++) {
         expression.push(step)
-        expression.push(zoomBoundCaseExpression(step, inRangeOpacity, fadedOpacity))
+        expression.push(zoomBoundCaseExpression(step, inRangeOpacity, outOfRangeOpacity))
     }
     return expression
 }
@@ -726,6 +729,7 @@ export class PathLineLayer extends VectorStyleLayer
     {
         const dimmed = options.dimmed || false
         const exclude = 'excludeAnnotated' in options && options.excludeAnnotated
+        const pathLowDensityMode = options.pathLowDensityMode || false
         const paintStyle: PaintSpecification = {
             'line-color': [
                 'let', 'active', ['to-number', ['feature-state', 'active'], 0],
@@ -740,7 +744,7 @@ export class PathLineLayer extends VectorStyleLayer
                     ['boolean', ['feature-state', 'selected'], false], 1.0,
                     ['boolean', ['feature-state', 'active'], false], 1.0,
                 0.0
-            ] :extentOpacityExpression(dimmed, 0.8, 0.1),
+            ] : extentOpacityExpression(dimmed, 0.8, 0.1, pathLowDensityMode),
             'line-width': [
                 'let',
                 'width', [

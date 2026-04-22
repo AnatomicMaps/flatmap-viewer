@@ -52,7 +52,7 @@ import {VECTOR_TILES_SOURCE} from './layers/styling'
 import {MARKER_DEFAULT_COLOUR} from './markers'
 import {latex2Svg} from './mathjax'
 import type {NerveCentrelineDetails} from './pathways'
-import {PathManager} from './pathways'
+import {PathManager, PATHWAYS_LAYER} from './pathways'
 import {SystemsManager} from './systems'
 
 import {displayedProperties, InfoControl} from './controls/info'
@@ -191,6 +191,7 @@ export class UserInteractions
     #modal: boolean = false
     #nerveCentrelineFacet: NerveCentreFacet
     #pan_zoom_enabled: boolean = false
+    #pathLowDensityMode: boolean = false
     #pathManager: PathManager
     #pathTypeFacet: PathTypeFacet
     #selectedFeatureRefCount = new Map()
@@ -359,6 +360,10 @@ export class UserInteractions
         this.#map.on('move', this.#panZoomEvent.bind(this, 'pan'))
         this.#map.on('zoom', this.#panZoomEvent.bind(this, 'zoom'))
         this.#map.on('zoomend', this.#panZoomEvent.bind(this, 'zoomend'))
+        this.#map.on('moveend', this.#panZoomEvent.bind(this, 'moveend'))
+
+        // Prime path density so initial rendering and hit-testing are in sync.
+        this.#updateAreaDensity(true)
     }
 
     get minimap()
@@ -1260,8 +1265,15 @@ export class UserInteractions
             return false
         }
 
-        this.#cacheSourceLayerFeatureZoomRanges(mapFeature.sourceLayer)
-        const rangesByFeatureId = this.#featureZoomRangesBySourceLayer.get(mapFeature.sourceLayer)
+        const sourceLayer = mapFeature.sourceLayer
+        const pathwaysSourceLayer = PATHWAYS_LAYER.replaceAll('/', '_')
+        const isPathFeature = sourceLayer.includes(pathwaysSourceLayer)
+
+        if (isPathFeature && this.#pathLowDensityMode) {
+            return true
+        }
+        this.#cacheSourceLayerFeatureZoomRanges(sourceLayer)
+        const rangesByFeatureId = this.#featureZoomRangesBySourceLayer.get(sourceLayer)
         const ranges = rangesByFeatureId?.get(+featureId)
         if (!ranges || ranges.length === 0) {
             return false
@@ -1271,6 +1283,51 @@ export class UserInteractions
             (minzoom == null || zoom >= minzoom)
          && (maxzoom == null || zoom <= maxzoom)
         )
+    }
+
+    #updateAreaDensity(force=false)
+    //=================================
+    {
+        const previousLowDensityMode = this.#pathLowDensityMode
+        const renderedFeatures = this.#map.queryRenderedFeatures()
+        const visibleEdgeIds = new Set<GeoJSONId>()
+        const pathwaysSourceLayer = PATHWAYS_LAYER.replaceAll('/', '_')
+
+        for (const feature of renderedFeatures) {
+            const sourceLayer = feature.sourceLayer || ''
+            if (feature.source !== VECTOR_TILES_SOURCE || !sourceLayer.includes(pathwaysSourceLayer)) {
+                continue
+            }
+            const pathType = feature.properties?.type
+            if (!['line', 'line-dash', 'bezier'].includes(pathType)) {
+                continue
+            }
+            const featureId = feature.properties?.featureId ?? feature.id
+            visibleEdgeIds.add(+featureId)
+        }
+
+        const PATH_DENSITY_MIN_EDGES = 80
+        const PATH_DENSITY_MAX_EDGES = 600
+        const PATH_DENSITY_LOW_THRESHOLD = 0.475
+        const PATH_DENSITY_HIGH_THRESHOLD = 0.525
+        const visibleEdgeCount = visibleEdgeIds.size
+        const density = Math.max(0, Math.min(1, (visibleEdgeCount - PATH_DENSITY_MIN_EDGES) / (PATH_DENSITY_MAX_EDGES - PATH_DENSITY_MIN_EDGES)))
+        let lowDensityMode = previousLowDensityMode
+        if (force) {
+            lowDensityMode = (density <= PATH_DENSITY_LOW_THRESHOLD)
+        } else if (density <= PATH_DENSITY_LOW_THRESHOLD) {
+            lowDensityMode = true
+        } else if (density >= PATH_DENSITY_HIGH_THRESHOLD) {
+            lowDensityMode = false
+        }
+        this.#pathLowDensityMode = lowDensityMode
+
+        const lowDensityModeChanged = (this.#pathLowDensityMode !== previousLowDensityMode)
+        if (force || lowDensityModeChanged) {
+            this.#layerManager.setPaint({
+                pathLowDensityMode: this.#pathLowDensityMode
+            })
+        }
     }
 
     #mouseMoveEvent(event)
@@ -2045,6 +2102,10 @@ export class UserInteractions
                     }
                 }
             }
+        }
+
+        if (type === 'zoomend' || type === 'moveend') {
+            this.#updateAreaDensity()
         }
     }
 
