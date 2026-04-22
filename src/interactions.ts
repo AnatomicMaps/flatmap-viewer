@@ -1415,7 +1415,15 @@ export class UserInteractions
         }
         const clickedDrawnFeatures = clickedFeatures.filter((f) => !f.id)
         clickedFeatures = clickedFeatures.filter((f) => f.id)
-        const clickedFeature = clickedFeatures[0]
+        let clickedFeature = clickedFeatures[0]
+        if (this.#flatmap.mapMetadata['map-kinds']?.includes('model')) {
+            for (const feature of clickedFeatures) {
+                if (feature.properties.variable) {
+                    clickedFeature = feature
+                    break
+                }
+            }
+        }
         if (this.#modal) {
             if (this.#resetOnClickEnabled) {
                 // Remove tooltip, reset active features, etc
