@@ -49,6 +49,7 @@ import type {MinimapOptions, Point2D} from './flatmap-types'
 import {type FlatMap, FLATMAP_STYLE} from './flatmap'
 import {isMarker, LayerManager} from './layers'
 import {ANATOMICAL_MARKERS_LAYER} from './layers/acluster'
+import {MARKERS_LAYER_ID_SUFFIX} from './layers/markers'
 import {VECTOR_TILES_SOURCE} from './layers/styling'
 import {MARKER_DEFAULT_COLOUR} from './markers'
 import {latex2Svg} from './mathjax'
@@ -1416,7 +1417,8 @@ export class UserInteractions
         const clickedDrawnFeatures = clickedFeatures.filter((f) => !f.id)
         clickedFeatures = clickedFeatures.filter((f) => f.id)
         let clickedFeature = clickedFeatures[0]
-        if (this.#flatmap.mapMetadata['map-kinds']?.includes('model')) {
+        if (this.#flatmap.mapMetadata['map-kinds']?.includes('model')
+         && !clickedFeature.layer.id.endsWith(MARKERS_LAYER_ID_SUFFIX)) {
             for (const feature of clickedFeatures) {
                 if (feature.properties.variable) {
                     clickedFeature = feature

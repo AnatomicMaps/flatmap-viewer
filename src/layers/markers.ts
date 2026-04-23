@@ -33,6 +33,10 @@ import { markerZoomScaling } from './styling'
 
 //==============================================================================
 
+export const MARKERS_LAYER_ID_SUFFIX = 'markers-_-layer'
+
+//==============================================================================
+
 type MarkerProperties = {
     cluster: boolean
     count: number
@@ -75,7 +79,7 @@ export class MarkerLayer
     {
         this.#map = flatmap.map
         this.#ui = ui
-        this.#id = `${layerId}-markers-layer`
+        this.#id = `${layerId}-${MARKERS_LAYER_ID_SUFFIX}`
         this.#source = `${layerId}-markers-source`
 
         this.#map.addSource(this.#source, {
