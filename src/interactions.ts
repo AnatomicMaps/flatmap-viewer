@@ -54,7 +54,7 @@ import {VECTOR_TILES_SOURCE} from './layers/styling'
 import {MARKER_DEFAULT_COLOUR} from './markers'
 import {latex2Svg} from './mathjax'
 import type {NerveCentrelineDetails} from './pathways'
-import {PathManager} from './pathways'
+import {PathManager, PATHWAYS_LAYER} from './pathways'
 import {SystemsManager} from './systems'
 
 import {displayedProperties, InfoControl} from './controls/info'
@@ -174,6 +174,7 @@ export class UserInteractions
     #currentPopup: maplibregl.Popup|null = null
     #featureEnabledCount: Map<GeoJSONId, number>
     #featureIdToMapId: Map<string, GeoJSONId>
+    #featureZoomRangesBySourceLayer: Map<string, Map<GeoJSONId, Array<[number|null, number|null]>>> = new Map()
     #flatmap: FlatMap
     #imageLayerIds = new Map()
     #infoControl: InfoControl|null = null
@@ -182,6 +183,7 @@ export class UserInteractions
     #lastFeatureModelsMouse: string|null = null
     #lastImageId: number = 0
     #lastMarkerId: number = 900000
+    #lastMousePoint: [number, number]|null = null
     #layerManager: LayerManager
     #map: maplibregl.Map
     #markerIdByFeatureId = new Map()
@@ -191,6 +193,7 @@ export class UserInteractions
     #modal: boolean = false
     #nerveCentrelineFacet: NerveCentreFacet
     #pan_zoom_enabled: boolean = false
+    #pathLowDensityMode: boolean = false
     #pathManager: PathManager
     #pathTypeFacet: PathTypeFacet
     #selectedFeatureRefCount = new Map()
@@ -198,6 +201,8 @@ export class UserInteractions
     #taxonFacet: TaxonFacet
     #tooltip: maplibregl.Popup|null = null
     #resetOnClickEnabled: boolean = true
+    #collectingActiveFeatures: boolean = false
+    #nextActiveFeatures: Map<GeoJSONId, MapFeature>|null = null
 
     constructor(flatmap: FlatMap)
     {
@@ -356,6 +361,11 @@ export class UserInteractions
         // Handle pan/zoom events
         this.#map.on('move', this.#panZoomEvent.bind(this, 'pan'))
         this.#map.on('zoom', this.#panZoomEvent.bind(this, 'zoom'))
+        this.#map.on('zoomend', this.#panZoomEvent.bind(this, 'zoomend'))
+        this.#map.on('moveend', this.#panZoomEvent.bind(this, 'moveend'))
+
+        // Prime path density so initial rendering and hit-testing are in sync.
+        this.#updateAreaDensity(true)
     }
 
     get minimap()
@@ -816,9 +826,18 @@ export class UserInteractions
     //==========================================================
     {
         if (feature) {
-            this.#setFeatureState(feature, { active: true })
-            if (!this.#activeFeatures.has(+feature.id)) {
-                this.#activeFeatures.set(+feature.id, feature)
+            const activeMap = this.#collectingActiveFeatures ? this.#nextActiveFeatures
+                                                             : this.#activeFeatures
+            if (activeMap && activeMap.has(+feature.id)) {
+                return
+            }
+            if (this.#collectingActiveFeatures) {
+                this.#nextActiveFeatures?.set(+feature.id, feature)
+            } else {
+                this.#setFeatureState(feature, { active: true })
+                if (!this.#activeFeatures.has(+feature.id)) {
+                    this.#activeFeatures.set(+feature.id, feature)
+                }
             }
             // If the feature is a nerve, activate its inner features too
             for (const innerFeatureId of this.#flatmap.featureIdsByNerveId(+feature.id)) {
@@ -841,6 +860,35 @@ export class UserInteractions
         }
     }
 
+    #beginActiveFeatureUpdate()
+    //=========================
+    {
+        this.#collectingActiveFeatures = true
+        this.#nextActiveFeatures = new Map()
+    }
+
+    #commitActiveFeatureUpdate()
+    //==========================
+    {
+        const nextActiveFeatures = this.#nextActiveFeatures || new Map()
+
+        for (const [featureId, feature] of this.#activeFeatures.entries()) {
+            if (!nextActiveFeatures.has(featureId)) {
+                this.#removeFeatureState(feature, 'active')
+            }
+        }
+
+        for (const [featureId, feature] of nextActiveFeatures.entries()) {
+            if (!this.#activeFeatures.has(featureId)) {
+                this.#setFeatureState(feature, { active: true })
+            }
+        }
+
+        this.#activeFeatures = nextActiveFeatures
+        this.#collectingActiveFeatures = false
+        this.#nextActiveFeatures = null
+    }
+
     #resetActiveFeatures()
     //====================
     {
@@ -848,6 +896,8 @@ export class UserInteractions
             this.#removeFeatureState(feature, 'active')
         }
         this.#activeFeatures.clear()
+        this.#collectingActiveFeatures = false
+        this.#nextActiveFeatures = null
     }
 
     /* UNUSED
@@ -1174,12 +1224,123 @@ export class UserInteractions
     //===========================================================
     {
         const features = this.#layerManager.featuresAtPoint(point)
-        return features.filter(feature => this.#featureEnabled(feature))
+        return features.filter(feature => {
+            const featureId = feature.properties?.featureId ?? feature.id
+            return this.#featureIdIsRenderable(+featureId)
+        })
+    }
+
+    #cacheSourceLayerFeatureZoomRanges(sourceLayer: string)
+    //===============================================
+    {
+        if (this.#featureZoomRangesBySourceLayer.has(sourceLayer)) {
+            return
+        }
+
+        const rangesByFeatureId = new Map<GeoJSONId, Array<[number|null, number|null]>>()
+        const features = this.#map.querySourceFeatures(VECTOR_TILES_SOURCE, {sourceLayer})
+
+        for (const feature of features) {
+            const featureId: number = feature.id ? +feature.id
+                                                    : +feature.properties.featureId
+
+            const minzoomRaw = Number(feature.properties?.minzoom)
+            const maxzoomRaw = Number(feature.properties?.maxzoom)
+            const minzoom = Number.isFinite(minzoomRaw) ? minzoomRaw : null
+            const maxzoom = Number.isFinite(maxzoomRaw) ? maxzoomRaw : null
+
+            const ranges = rangesByFeatureId.get(featureId) || []
+            ranges.push([minzoom, maxzoom])
+            rangesByFeatureId.set(featureId, ranges)
+        }
+
+        this.#featureZoomRangesBySourceLayer.set(sourceLayer, rangesByFeatureId)
+    }
+
+    #featureIdIsRenderable(featureId: GeoJSONId): boolean
+    //===================================================
+    {
+        const zoom = Math.floor(this.#map.getZoom())
+        const mapFeature = this.mapFeature(+featureId)
+        if (!this.#featureEnabled(mapFeature)) {
+            return false
+        }
+        if (mapFeature === null || !mapFeature.sourceLayer) {
+            return false
+        }
+
+        const sourceLayer = mapFeature.sourceLayer
+        const pathwaysSourceLayer = PATHWAYS_LAYER.replaceAll('/', '_')
+        const isPathFeature = sourceLayer.includes(pathwaysSourceLayer)
+
+        if (isPathFeature && this.#pathLowDensityMode) {
+            return true
+        }
+        this.#cacheSourceLayerFeatureZoomRanges(sourceLayer)
+        const rangesByFeatureId = this.#featureZoomRangesBySourceLayer.get(sourceLayer)
+        const ranges = rangesByFeatureId?.get(+featureId)
+        if (!ranges || ranges.length === 0) {
+            return false
+        }
+
+        return ranges.some(([minzoom, maxzoom]) =>
+            (minzoom == null || zoom >= minzoom)
+         && (maxzoom == null || zoom <= maxzoom)
+        )
+    }
+
+    #updateAreaDensity(force=false)
+    //=================================
+    {
+        const previousLowDensityMode = this.#pathLowDensityMode
+        const renderedFeatures = this.#map.queryRenderedFeatures()
+        const visibleEdgeIds = new Set<GeoJSONId>()
+        const pathwaysSourceLayer = PATHWAYS_LAYER.replaceAll('/', '_')
+
+        for (const feature of renderedFeatures) {
+            const sourceLayer = feature.sourceLayer || ''
+            if (feature.source !== VECTOR_TILES_SOURCE || !sourceLayer.includes(pathwaysSourceLayer)) {
+                continue
+            }
+            const pathType = feature.properties?.type
+            if (!['line', 'line-dash', 'bezier'].includes(pathType)) {
+                continue
+            }
+            const featureId = feature.properties?.featureId ?? feature.id
+            visibleEdgeIds.add(+featureId)
+        }
+
+        const PATH_DENSITY_MIN_EDGES = 80
+        const PATH_DENSITY_MAX_EDGES = 600
+        const PATH_DENSITY_LOW_THRESHOLD = 0.475
+        const PATH_DENSITY_HIGH_THRESHOLD = 0.525
+        const visibleEdgeCount = visibleEdgeIds.size
+        const density = Math.max(0, Math.min(1, (visibleEdgeCount - PATH_DENSITY_MIN_EDGES) / (PATH_DENSITY_MAX_EDGES - PATH_DENSITY_MIN_EDGES)))
+        let lowDensityMode = previousLowDensityMode
+        if (force) {
+            lowDensityMode = (density <= PATH_DENSITY_LOW_THRESHOLD)
+        } else if (density <= PATH_DENSITY_LOW_THRESHOLD) {
+            lowDensityMode = true
+        } else if (density >= PATH_DENSITY_HIGH_THRESHOLD) {
+            lowDensityMode = false
+        }
+        this.#pathLowDensityMode = lowDensityMode
+
+        const lowDensityModeChanged = (this.#pathLowDensityMode !== previousLowDensityMode)
+        if (force || lowDensityModeChanged) {
+            this.#layerManager.setPaint({
+                pathLowDensityMode: this.#pathLowDensityMode
+            })
+        }
     }
 
     #mouseMoveEvent(event)
     //====================
     {
+        this.#lastMousePoint = event.point
+        if (this.#map.isMoving()) {
+            return
+        }
         this.#updateActiveFeature(event.point, event.lngLat)
     }
 
@@ -1191,8 +1352,13 @@ export class UserInteractions
             return
         }
 
-        // Remove tooltip, reset active features, etc
-        this.#resetFeatureDisplay()
+        if (this.#map.isMoving()) {
+            return
+        }
+
+        // Remove tooltip and reset cursor; active features are updated by diff.
+        this.#removeTooltip()
+        this.#map.getCanvas().style.cursor = 'default'
 
         // Reset any info display
         const displayInfo = (this.#infoControl?.active)
@@ -1201,12 +1367,14 @@ export class UserInteractions
         }
 
         const eventLngLat = this.#map.unproject(eventPoint)
+        this.#beginActiveFeatureUpdate()
 
         // Get all the features at the current point
         const features = this.#renderedFeatures(eventPoint)
         if (features.length === 0) {
             this.#lastFeatureMouseEntered = null
             this.#lastFeatureModelsMouse = null
+            this.#commitActiveFeatureUpdate()
             if (this.#flatmap.options.showCoords || this.#flatmap.options.showLngLat) {
                 this.#showToolTip('', eventLngLat, null)
             }
@@ -1322,6 +1490,8 @@ export class UserInteractions
                 }
             }
         }
+
+        this.#commitActiveFeatureUpdate()
 
         if (info !== '') {
             this.#infoControl.show(info)
@@ -1511,12 +1681,16 @@ export class UserInteractions
                 this.activateFeature(this.mapFeature(+nerveId))
             }
             for (const featureId of this.#pathManager.nerveFeatureIds(nerveId)) {
-                this.activateFeature(this.mapFeature(+featureId))
+                if (this.#featureIdIsRenderable(+featureId)) {
+                    this.activateFeature(this.mapFeature(+featureId))
+                }
             }
         }
         if ('nodeId' in feature.properties) {
             for (const featureId of this.#pathManager.pathFeatureIds(+feature.properties.nodeId)) {
-                this.activateFeature(this.mapFeature(featureId))
+                if (this.#featureIdIsRenderable(+featureId)) {
+                    this.activateFeature(this.mapFeature(+featureId))
+                }
             }
         }
     }
@@ -1929,15 +2103,25 @@ export class UserInteractions
             this.#flatmap.panZoomEvent(type)
         }
         if (type === 'zoom') {
-            if ('originalEvent' in event) {
-                if ('layerX' in event.originalEvent && 'layerY' in event.originalEvent) {
-                    this.#updateActiveFeature([
-                        event.originalEvent.layerX,
-                        event.originalEvent.layerY
-                    ])
+            this.#layerManager.zoomEvent()
+        }
+
+        if (type === 'zoomend') {
+            this.#featureZoomRangesBySourceLayer.clear()
+            if (this.#lastMousePoint !== null) {
+                if ('originalEvent' in event) {
+                    if ('layerX' in event.originalEvent && 'layerY' in event.originalEvent) {
+                        this.#updateActiveFeature([
+                            event.originalEvent.layerX,
+                            event.originalEvent.layerY
+                        ])
+                    }
                 }
             }
-            this.#layerManager.zoomEvent()
+        }
+
+        if (type === 'zoomend' || type === 'moveend') {
+            this.#updateAreaDensity()
         }
     }
 
