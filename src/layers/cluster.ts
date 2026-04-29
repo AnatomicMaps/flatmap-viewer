@@ -18,12 +18,12 @@ limitations under the License.
 
 ==============================================================================*/
 
-import maplibregl from 'maplibre-gl';
+import type maplibregl from 'maplibre-gl';
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
-import {UserInteractions} from '../interactions'
+import type {FlatMap} from '../flatmap'
+import type {UserInteractions} from '../interactions'
 import {DATASET_CLUSTERED_MARKER, UNCLUSTERED_MARKER} from '../markers'
 
 //==============================================================================
@@ -51,7 +51,7 @@ export class ClusteredMarkerLayer
     constructor(flatmap: FlatMap, ui: UserInteractions)
     {
         this.#ui = ui
-        this.#map = flatmap.map!
+        this.#map = flatmap.map
 
         this.#map.addSource('markers', {
             type: 'geojson',

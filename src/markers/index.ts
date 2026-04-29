@@ -18,13 +18,14 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Map as MapLibreMap} from 'maplibre-gl'
+import type {Map as MapLibreMap} from 'maplibre-gl'
 
 import {SvgManager, SvgTemplateManager} from '../../thirdParty/maplibre-gl-svg/src'
 
 //==============================================================================
 
 export const MARKER_DEFAULT_COLOUR = '#005974'
+const MULTISCALE_MARKER_COLOUR = '#11a6ff'
 
 //==============================================================================
 
@@ -91,31 +92,35 @@ const markerIconDefinitions: MarkerIconDefinition[] = [
         svg: CLUSTERED_MARKER_SVG,
         options: {
             color: '#EE5900',
-            secondaryColor: '#fff'
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {
         id: MULTISCALE_CLUSTERED_MARKER,
         svg: CLUSTERED_MARKER_SVG,
         options: {
-            color: '#11a6ff',
-            secondaryColor: '#fff'
+            color: MULTISCALE_MARKER_COLOUR,
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {
         id: MULTISCALE_MARKER,
         svg: UNCLUSTERED_MARKER_SVG,
         options: {
-            color: '#11a6ff',
-            secondaryColor: '#fff'
+            color: MULTISCALE_MARKER_COLOUR,
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {
         id: UNCLUSTERED_MARKER,
         svg: UNCLUSTERED_MARKER_SVG,
         options: {
-            color: '##005974',
-            secondaryColor: '#fff'
+            color: MARKER_DEFAULT_COLOUR,
+            secondaryColor: '#fff',
+            scale: 10
         }
     },
     {

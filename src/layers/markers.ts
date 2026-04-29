@@ -18,18 +18,22 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Map as MapLibreMap} from 'maplibre-gl'
-import {GeoJSONSource} from 'maplibre-gl'
+import type {GeoJSONSource, Map as MapLibreMap} from 'maplibre-gl'
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
-import {FlatMapFeatureAnnotation, FlatMapMarkerOptions} from '../flatmap-types'
-import type {GeoJSONId} from '../flatmap-types'
-import {UserInteractions} from '../interactions'
+import type {FlatMap} from '../flatmap'
+import type {FlatMapFeatureAnnotation, FlatMapMarkerOptions, GeoJSONId} from '../flatmap-types'
+import type {UserInteractions} from '../interactions'
 import {DATASET_CLUSTERED_MARKER, UNCLUSTERED_MARKER,
         MULTISCALE_CLUSTERED_MARKER, MULTISCALE_MARKER} from '../markers'
-import {PropertiesType} from '../types'
+import type {PropertiesType} from '../types'
+
+import { markerZoomScaling } from './styling'
+
+//==============================================================================
+
+export const MARKERS_LAYER_ID_SUFFIX = 'markers-_-layer'
 
 //==============================================================================
 
@@ -73,9 +77,9 @@ export class MarkerLayer
 
     constructor(flatmap: FlatMap, ui: UserInteractions, layerId: string)
     {
-        this.#map = flatmap.map!
+        this.#map = flatmap.map
         this.#ui = ui
-        this.#id = `${layerId}-markers-layer`
+        this.#id = `${layerId}-${MARKERS_LAYER_ID_SUFFIX}`
         this.#source = `${layerId}-markers-source`
 
         this.#map.addSource(this.#source, {
@@ -100,20 +104,20 @@ export class MarkerLayer
                 ],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
-                'icon-offset': [0, -17],
-                'icon-size': 0.8,
+                'icon-offset': [0, -30],
+                'icon-size': markerZoomScaling(0.2),
                 'text-field': ['case',
                                     ['get', 'cluster'], ['get', 'count'],
                                     ['>', ['get', 'count'], 1], ['get', 'count'],
                                 ''],
-                'text-size': 10,
-                'text-offset': [0, -1.93],
+                'text-size': markerZoomScaling(10),
+                'text-offset': [0, -0.71],
                 'text-allow-overlap': true,
                 'text-ignore-placement': true,
             },
             paint: {
-                'icon-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 1],
-                'text-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 1]
+                'icon-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 0.8],
+                'text-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 0.8]
             }
         })
     }

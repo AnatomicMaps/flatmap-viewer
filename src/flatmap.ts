@@ -1722,7 +1722,7 @@ export class FlatMap
     //==========================================================================
 
     /**
-     * Add dataset markers to the map.
+     * Add clustered anatomical markers for datasets to the map.
      *
      * @param {Array.<{id: string, terms: string[]}>} datasets  An array with an object for each dataset,
      *                                                          specifying its identifier and an array of
@@ -1733,42 +1733,60 @@ export class FlatMap
      *                                                   on which dataset markers have been placed.
      * @group Markers
      */
-    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
-    //=========================================================
+    addClusteredAnatomicalMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=====================================================================
     {
         if (this.#userInteractions !== null) {
-            return this.#userInteractions.addDatasetMarkers(datasets)
+            return this.#userInteractions.addClusteredAnatomicalMarkers(datasets)
         }
         return []
     }
-
-    /**
-     * Remove all dataset markers from the map.
-     *
-     * @group Markers
-     */
-    clearDatasetMarkers()
-    //===================
+    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=========================================================
     {
-        if (this.#userInteractions !== null) {
-            this.#userInteractions.clearDatasetMarkers()
-        }
+        console.warn('`addDatasetMarkers` is deprecated -- use `addClusteredAnatomicalMarkers` instead')
+        return this.addClusteredAnatomicalMarkers(datasets)
     }
 
     /**
-     * Remove markers for a dataset from the map.
+     * Remove all clustered anatomical markers from the map.
+     *
+     * @group Markers
+     */
+    clearClusteredAnatomicalMarkers()
+    //===============================
+    {
+        if (this.#userInteractions !== null) {
+            this.#userInteractions.clearClusteredAnatomicalMarkers()
+        }
+    }
+    clearDatasetMarkers()
+    //===================
+    {
+        console.warn('`clearDatasetMarkers` is deprecated -- use `clearClusteredAnatomicalMarkers` instead')
+        this.clearClusteredAnatomicalMarkers()
+    }
+
+    /**
+     * Remove clustered anatomical markers for a dataset from the map.
      *
      * @param datasetId  A dataset marker identifier as passed
      *                   to ``addDatasetMarkers()``
      *
      * @group Markers
      */
+    removeClusteredAnatomicalMarker(datasetId: string)
+    //================================================
+    {
+        if (this.#userInteractions !== null) {
+            this.#userInteractions.removeClusteredAnatomicalMarker(datasetId)
+        }
+    }
     removeDatasetMarker(datasetId: string)
     //====================================
     {
-        if (this.#userInteractions !== null) {
-            this.#userInteractions.removeDatasetMarker(datasetId)
-        }
+        console.warn('`removeDatasetMarker` is deprecated -- use `removeClusteredAnatomicalMarker` instead')
+        this.removeClusteredAnatomicalMarker(datasetId)
     }
 
     //==========================================================================

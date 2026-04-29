@@ -30,15 +30,22 @@ import type {FlatMap} from '../flatmap'
 import type {DatasetMarkerResult, DatasetTerms, MarkerKind} from '../flatmap-types'
 import type {GeoJSONId} from '../flatmap-types'
 import type {UserInteractions} from '../interactions'
+import {ANATOMICAL_ROOT, type MapTermGraph} from '../knowledge'
+import type {DiGraph} from '../knowledge/graphs'
 import {DATASET_CLUSTERED_MARKER, MULTISCALE_CLUSTERED_MARKER} from '../markers'
 import type {PropertiesType} from '../types'
 
-import {DatasetClusterSet, MAX_MARKER_ZOOM} from './datasetcluster'
+import { markerZoomScaling } from './styling'
 
 //==============================================================================
 
-export const ANATOMICAL_MARKERS_LAYER = 'anatomical-markers-layer'
+export const ANATOMICAL_MARKERS_LAYER = 'anatomical_-_markers-layer'
 const ANATOMICAL_MARKERS_SOURCE = 'anatomical-markers-source'
+
+//==============================================================================
+
+const MIN_MARKER_ZOOM =  2
+const MAX_MARKER_ZOOM = 12
 
 //==============================================================================
 
@@ -91,6 +98,189 @@ interface MarkerPoint
 
 //==============================================================================
 
+type ClusteredTerm = {
+    markerTerm: string
+    clusterId: string
+    minZoom: number
+    maxZoom: number
+}
+
+//==============================================================================
+
+class AnatomicalClusterSet
+{
+    #connectedTermGraph: DiGraph
+    #clusterId: string
+    #flatmap: FlatMap
+    #mapTermGraph: MapTermGraph
+    #markerTerms: Set<string>
+    #descendents: Map<string, Set<string>> = new Map()
+    #clustersByTerm: Map<string, ClusteredTerm> = new Map()
+    #maxDepth: number
+
+    constructor(clusterId: string, terms: string[], flatmap: FlatMap)
+    {
+        this.#clusterId = clusterId
+        this.#flatmap = flatmap
+        this.#mapTermGraph = flatmap.mapTermGraph
+        this.#maxDepth = this.#mapTermGraph.maxDepth
+
+        const datasetTerms = terms
+        const markerTermMap = this.#validatedMarkerTerms(datasetTerms)  // marker term ==> { dataset terms }
+        this.#markerTerms = new Set(markerTermMap.keys())
+        this.#connectedTermGraph = this.#mapTermGraph.connectedTermGraph([...this.#markerTerms.values()])
+        for (const markerTerm of this.#connectedTermGraph.nodes()) {
+            if (markerTermMap.has(markerTerm)) {
+                this.#connectedTermGraph.setNodeAttribute(markerTerm, 'terms', markerTermMap.get(markerTerm))
+            } else {
+                this.#connectedTermGraph.setNodeAttribute(markerTerm, 'terms', new Set([markerTerm]))
+            }
+        }
+        this.#clustersByTerm = new Map(this.#connectedTermGraph.nodes().map(markerTerm => {
+            const d = this.#mapTermGraph.depth(markerTerm)
+            const zoomRange = this.#depthToZoomRange(d)
+            return [ markerTerm, {
+                clusterId: this.#clusterId,
+                markerTerm: markerTerm,
+                minZoom: zoomRange[0],
+                maxZoom: zoomRange[1]
+            }]
+        }))
+        for (const markerTerm of this.#connectedTermGraph.nodes()
+                                                         .filter(term => term !== ANATOMICAL_ROOT
+                                                              && this.#connectedTermGraph.degree(term) === 1)) {
+            const cluster = this.#clustersByTerm.get(markerTerm)
+            cluster.maxZoom = MAX_MARKER_ZOOM
+            this.#setZoomFromParents(cluster, markerTerm)
+        }
+        this.#setMinZoomFromRoot(ANATOMICAL_ROOT)
+    }
+
+    get id(): string
+    //==============
+    {
+        return this.#clusterId
+    }
+
+    get clusters(): ClusteredTerm[]
+    //=============================
+    {
+        return [...this.#clustersByTerm.values()]
+    }
+
+    get markerTerms(): string[]
+    //=========================
+    {
+        return [...this.#markerTerms.values()]
+    }
+
+    get descendents(): Map<string, Set<string>>
+    //=========================================
+    {
+        return this.#descendents
+    }
+
+    #depthToZoomRange(depth: number): [number, number]
+    //================================================
+    {
+        const zoom = MIN_MARKER_ZOOM
+                   + Math.floor((MAX_MARKER_ZOOM - MIN_MARKER_ZOOM)*depth/this.#maxDepth)
+        return (zoom < 0)         ? [0, 1]
+             : (zoom >= MAX_MARKER_ZOOM) ? [MAX_MARKER_ZOOM, MAX_MARKER_ZOOM]
+             :                      [zoom, zoom+1]
+    }
+
+    #setMinZoomFromRoot(term: string)
+    //=================================
+    {
+        if (!this.#flatmap.hasAnatomicalIdentifier(term)) {
+            this.#clustersByTerm.delete(term)
+            for (const child of this.#connectedTermGraph.children(term)) {
+                const cluster = this.#clustersByTerm.get(child)
+                cluster.minZoom = 0
+                this.#setMinZoomFromRoot(child)
+           }
+        }
+    }
+
+    #setZoomFromParents(cluster: ClusteredTerm, markerTerm: string)
+    //=============================================================
+    {
+        let datasetTerms: Set<string> = this.#descendents.get(cluster.markerTerm)
+        if (datasetTerms === undefined) {
+            datasetTerms = new Set()
+        }
+        if (this.#connectedTermGraph.hasNodeAttribute(markerTerm, 'terms')) {
+            datasetTerms = datasetTerms.union(this.#connectedTermGraph.getNodeAttribute(markerTerm, 'terms'))
+            this.#descendents.set(cluster.markerTerm, datasetTerms)
+        }
+        if (cluster.markerTerm === ANATOMICAL_ROOT) {
+            cluster.minZoom = 0
+            return
+        }
+        for (const parent of this.#connectedTermGraph.parents(cluster.markerTerm)) {
+            const parentCluster = this.#clustersByTerm.get(parent)
+            if (parentCluster.maxZoom < cluster.minZoom) {
+                parentCluster.maxZoom = cluster.minZoom
+            }
+            this.#setZoomFromParents(parentCluster, markerTerm)
+        }
+    }
+
+    #substituteTerm(term: string): string|null
+    //========================================
+    {
+        const parents = this.#mapTermGraph.parents(term)
+        if (parents.length === 0
+         || parents[0] === ANATOMICAL_ROOT) {
+            return null
+        }
+        const maxDepth = -1
+        let furthestParent: string|null = null
+        for (const parent of parents) {
+            if (this.#flatmap.hasAnatomicalIdentifier(parent)) {
+                const depth = this.#mapTermGraph.depth(parent)
+                if (depth > maxDepth) {
+                    furthestParent = parent
+                }
+            }
+        }
+        return furthestParent
+                ? furthestParent
+                : this.#substituteTerm(parents[0])
+    }
+
+    #validatedMarkerTerms(terms: string[]): Map<string, Set<string>>
+    //==============================================================
+    {
+        const markerTerms: Map<string, Set<string>> = new Map()
+        function addMarkerTerm(markerTerm: string, datasetTerm: string)
+        {
+            let datasetTerms = markerTerms.get(markerTerm)
+            if (datasetTerms === undefined) {
+                datasetTerms = new Set()
+                markerTerms.set(markerTerm, datasetTerms)
+            }
+            datasetTerms.add(datasetTerm)
+        }
+        for (let term of terms) {
+            term = term.trim()
+            if (this.#flatmap.hasAnatomicalIdentifier(term)) {
+                addMarkerTerm(term, term)
+            } else if (term !== '') {
+                const substitute = this.#substituteTerm(term)
+                if (substitute) {
+                    addMarkerTerm(substitute, term)
+                }
+            }
+        }
+        return markerTerms
+    }
+}
+
+//==============================================================================
+
+
 export class ClusteredAnatomicalMarkerLayer
 {
     #datasetFeatureIds: Map<string, Set<number>> = new Map()
@@ -133,17 +323,17 @@ export class ClusteredAnatomicalMarkerLayer
                 'icon-image': zoomCountIcon(this.#maxZoom),
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
-                'icon-offset': [0, -17],
-                'icon-size': 0.8,
+                'icon-offset': [0, -30],
+                'icon-size': markerZoomScaling(0.2),
                 'text-field': zoomCountText(this.#maxZoom),
-                'text-size': 10,
-                'text-offset': [0, -1.93],
+                'text-size': markerZoomScaling(10),
+                'text-offset': [0, -0.97],
                 'text-allow-overlap': true,
                 'text-ignore-placement': true,
             },
             paint: {
-                'icon-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 1],
-                'text-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 1]
+                'icon-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 0.8],
+                'text-opacity': ['case', ['boolean', ['get', 'hidden'], false], 0, 0.8]
             }
         })
     }
@@ -219,14 +409,14 @@ export class ClusteredAnatomicalMarkerLayer
         this.#showPoints()
     }
 
-    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
-    //=========================================================
+    addClusteredMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //===========================================================
     {
         const mapDatasetMarkers: DatasetTerms[] = []
 
         for (const dataset of datasets) {
             if (dataset.terms.length) {
-                const clusteredSet = new DatasetClusterSet(dataset, this.#flatmap)
+                const clusteredSet = new AnatomicalClusterSet(dataset.id, dataset.terms, this.#flatmap)
                 mapDatasetMarkers.push({
                     id: dataset.id,
                     terms: clusteredSet.markerTerms
@@ -252,8 +442,8 @@ export class ClusteredAnatomicalMarkerLayer
                         this.#datasetTermsByZoomTerm.set(cluster.markerTerm, zoomDatasetTerms)
                     }
                     for (let zoom = cluster.minZoom; zoom < cluster.maxZoom; zoom += 1) {
-                        zoomDatasets[zoom].add(cluster.datasetId)
-                        zoomMultiscale[zoom] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
+                        zoomDatasets[zoom].add(cluster.clusterId)
+                        zoomMultiscale[zoom] ||= (this.#kindByDataset.get(cluster.clusterId) === 'multiscale')
                         const datasetTerms = clusteredSet.descendents.get(cluster.markerTerm)
                         if (datasetTerms) {
                             for (const term of datasetTerms.values()) {
@@ -262,18 +452,18 @@ export class ClusteredAnatomicalMarkerLayer
                         }
                     }
                     if (cluster.maxZoom === MAX_MARKER_ZOOM) {
-                        zoomDatasets[MAX_MARKER_ZOOM].add(cluster.datasetId)
-                        zoomMultiscale[MAX_MARKER_ZOOM] ||= (this.#kindByDataset.get(cluster.datasetId) === 'multiscale')
+                        zoomDatasets[MAX_MARKER_ZOOM].add(cluster.clusterId)
+                        zoomMultiscale[MAX_MARKER_ZOOM] ||= (this.#kindByDataset.get(cluster.clusterId) === 'multiscale')
                         const datasetTerms = clusteredSet.descendents.get(cluster.markerTerm)
                         if (datasetTerms) {
                             for (const term of datasetTerms.values()) {
                                 zoomDatasetTerms[MAX_MARKER_ZOOM].add(term)
                             }
                         }
-                        let datasetFeatureIds = this.#datasetFeatureIds.get(cluster.datasetId)
+                        let datasetFeatureIds = this.#datasetFeatureIds.get(cluster.clusterId)
                         if (!datasetFeatureIds) {
                             datasetFeatureIds = new Set()
-                            this.#datasetFeatureIds.set(cluster.datasetId, datasetFeatureIds)
+                            this.#datasetFeatureIds.set(cluster.clusterId, datasetFeatureIds)
                         }
                         for (const featureId of this.#flatmap.modelFeatureIds(cluster.markerTerm)) {
                             datasetFeatureIds.add(+featureId)
@@ -297,8 +487,8 @@ export class ClusteredAnatomicalMarkerLayer
         return mapDatasetMarkers
     }
 
-    clearDatasetMarkers()
-    //===================
+    clearClusteredMarkers()
+    //=====================
     {
         this.#datasetFeatureIds.clear()
         this.#datasetsByZoomTerm.clear()
@@ -307,8 +497,8 @@ export class ClusteredAnatomicalMarkerLayer
         this.#update()
     }
 
-    removeDatasetMarker(datasetId: string)
-    //====================================
+    removeClusteredMarker(datasetId: string)
+    //======================================
     {
         if (this.#datasetFeatureIds.has(datasetId)) {
             this.#datasetFeatureIds.delete(datasetId)

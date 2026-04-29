@@ -48,6 +48,8 @@ import type {BoundingBox, DatasetTerms, FeatureZoomOptions, GeoJSONId} from './f
 import type {MinimapOptions, Point2D} from './flatmap-types'
 import {type FlatMap, FLATMAP_STYLE} from './flatmap'
 import {isMarker, LayerManager} from './layers'
+import {ANATOMICAL_MARKERS_LAYER} from './layers/acluster'
+import {MARKERS_LAYER_ID_SUFFIX} from './layers/markers'
 import {VECTOR_TILES_SOURCE} from './layers/styling'
 import {MARKER_DEFAULT_COLOUR} from './markers'
 import {latex2Svg} from './mathjax'
@@ -1187,8 +1189,10 @@ export class UserInteractions
         let properties: FlatMapFeatureAnnotation
         if (isMarker(feature)) {
             const markerProperties: object = Object.assign({}, feature.properties, values)
-            const markerTerm = markerProperties['models']
-            markerProperties['dataset-terms'] = this.#layerManager.datasetTerms(markerTerm)
+            if (feature.layer.id === ANATOMICAL_MARKERS_LAYER) {
+                const markerTerm = markerProperties['models']
+                markerProperties['dataset-terms'] = this.#layerManager.datasetTerms(markerTerm)
+            }
             return this.#flatmap.markerEvent(type, +feature.id, markerProperties as FlatMapFeatureAnnotation)
         } else if ('properties' in feature) {
             properties = Object.assign({}, feature.properties, values) as FlatMapFeatureAnnotation
@@ -1582,7 +1586,16 @@ export class UserInteractions
         }
         const clickedDrawnFeatures = clickedFeatures.filter((f) => !f.id)
         clickedFeatures = clickedFeatures.filter((f) => f.id)
-        const clickedFeature = clickedFeatures[0]
+        let clickedFeature = clickedFeatures[0]
+        if (this.#flatmap.mapMetadata['map-kinds']?.includes('model')
+         && !clickedFeature.layer.id.endsWith(MARKERS_LAYER_ID_SUFFIX)) {
+            for (const feature of clickedFeatures) {
+                if (feature.properties.variable) {
+                    clickedFeature = feature
+                    break
+                }
+            }
+        }
         if (this.#modal) {
             if (this.#resetOnClickEnabled) {
                 // Remove tooltip, reset active features, etc
@@ -1851,10 +1864,14 @@ export class UserInteractions
         if (markerPosition === null || annotation.kind === 'zoom-point') {
             return markerId
         }
+        if (!options?.colour && !options.element) {
+            return this.#layerManager.addLayeredMarker(annotation, options)
+        }
+
         // Only create a marker if there's not already one for the feature
         // NB. If several features have the same anatomical id then each will have
         //     a marker, all with the same marker id
-        if (!('marker' in annotation)) {
+        if (!('marker' in annotation)) {    // where is this set??
             if (markerId === -1) {
                 markerId = this.nextMarkerId()
             }
@@ -1895,9 +1912,8 @@ export class UserInteractions
     clearMarkers()
     //============
     {
-        if (this.#layerManager) {
-            this.#layerManager.clearMarkers()
-        }
+        this.#layerManager.clearMarkers()
+        this.#layerManager.clearLayeredMarkers()
         for (const marker of this.#markerIdByMarker.keys()) {
             marker.remove()
         }
@@ -1918,28 +1934,28 @@ export class UserInteractions
         }
     }
 
-    addDatasetMarkers(datasets: DatasetTerms[]): DatasetTerms[]
-    //=========================================================
+    addClusteredAnatomicalMarkers(datasets: DatasetTerms[]): DatasetTerms[]
+    //=====================================================================
     {
         if (this.#layerManager) {
-            return this.#layerManager.addDatasetMarkers(datasets)
+            return this.#layerManager.addClusteredAnatomicalMarkers(datasets)
         }
         return []
     }
 
-    clearDatasetMarkers()
-    //===================
+    clearClusteredAnatomicalMarkers()
+    //===============================
     {
         if (this.#layerManager) {
-            this.#layerManager.clearDatasetMarkers()
+            this.#layerManager.clearClusteredAnatomicalMarkers()
         }
     }
 
-    removeDatasetMarker(datasetId: string)
-    //====================================
+    removeClusteredAnatomicalMarker(datasetId: string)
+    //================================================
     {
         if (this.#layerManager) {
-            this.#layerManager.removeDatasetMarker(datasetId)
+            this.#layerManager.removeClusteredAnatomicalMarker(datasetId)
         }
     }
 
