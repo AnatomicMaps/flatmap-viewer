@@ -1,6 +1,6 @@
 {
+  "version": "4.4.4-beta.1",
   "name": "@abi-software/flatmap-viewer",
-  "version": "4.4.3",
   "description": "Flatmap viewer using Maplibre GL",
   "repository": {
     "type": "git",

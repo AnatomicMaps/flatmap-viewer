@@ -1210,28 +1210,65 @@ export class UserInteractions
         // Simulate `mouseenter` events on features
 
         const feature = features[0]
-        const featureId: number = isMarker(feature) ? +feature.id!
-                                                                    : +feature.properties.featureId!
-        const featureModels = ('properties' in feature && 'models' in feature.properties)
-                            ? feature.properties.models
-                            : null
-        if (this.#lastFeatureMouseEntered !== featureId
-         && (this.#lastFeatureModelsMouse === null
-          || this.#lastFeatureModelsMouse !== featureModels)) {
-            if (this.#featureEvent('mouseenter', feature,
-                                    this.#locationOnLine(+featureId, lngLat))) {
-                this.#lastFeatureMouseEntered = featureId
-                this.#lastFeatureModelsMouse = featureModels
-            } else {
-                this.#lastFeatureMouseEntered = null
-                this.#lastFeatureModelsMouse = null
+        const lineFeatures = features.filter(feature => ('centreline' in feature.properties
+                                                        || ('type' in feature.properties
+                                                        && feature.properties.type.startsWith('line'))))
+                                    .filter((feature, index, self) => {
+                                        // Deduplicate: the same feature can appear multiple times
+                                        // when it spans across vector tile boundaries
+                                        const fId = isMarker(feature) ? +feature.id : +feature.properties.featureId
+                                        return index === self.findIndex(g => {
+                                            const gId = isMarker(g) ? +g.id : +g.properties.featureId
+                                            return gId === fId
+                                        })
+                                    })
+
+        // When multiple line (path) features overlap, emit all of them
+        if (lineFeatures.length > 1) {
+            const firstLineFeature = lineFeatures[0]
+            const firstFeatureId = isMarker(firstLineFeature) ? +firstLineFeature.id
+                                                                : +firstLineFeature.properties.featureId
+            const firstFeatureModels = ('properties' in firstLineFeature && 'models' in firstLineFeature.properties)
+                                        ? firstLineFeature.properties.models
+                                        : null
+            if (this.#lastFeatureMouseEntered !== firstFeatureId
+                && (this.#lastFeatureModelsMouse === null
+                || this.#lastFeatureModelsMouse !== firstFeatureModels)) {
+                const allFeatureProperties = lineFeatures.map(feature =>
+                    Object.assign({}, feature.properties, this.#locationOnLine(+feature.properties.featureId, lngLat))
+                ) as FlatMapFeatureAnnotation[]
+                if (this.#multiFeatureEvent('mouseenter', allFeatureProperties)) {
+                    this.#lastFeatureMouseEntered = firstFeatureId
+                    this.#lastFeatureModelsMouse = firstFeatureModels
+                } else {
+                    this.#lastFeatureMouseEntered = null
+                    this.#lastFeatureModelsMouse = null
+                }
             }
-        } else if (this.#flatmap.options.style === FLATMAP_STYLE.CENTRELINE
-                && feature.properties.centreline) {
-            if (this.#lastFeatureMouseEntered === featureId) {
-                const location = this.#locationOnLine(+featureId, lngLat)
-                if ('location' in location) {
-                    this.#featureEvent('mousemove', feature, location)
+        } else {
+            const featureId: number = isMarker(feature) ? +feature.id!
+                                                                        : +feature.properties.featureId!
+            const featureModels = ('properties' in feature && 'models' in feature.properties)
+                                ? feature.properties.models
+                                : null
+            if (this.#lastFeatureMouseEntered !== featureId
+             && (this.#lastFeatureModelsMouse === null
+              || this.#lastFeatureModelsMouse !== featureModels)) {
+                if (this.#featureEvent('mouseenter', feature,
+                                        this.#locationOnLine(+featureId, lngLat))) {
+                    this.#lastFeatureMouseEntered = featureId
+                    this.#lastFeatureModelsMouse = featureModels
+                } else {
+                    this.#lastFeatureMouseEntered = null
+                    this.#lastFeatureModelsMouse = null
+                }
+            } else if (this.#flatmap.options.style === FLATMAP_STYLE.CENTRELINE
+                    && feature.properties.centreline) {
+                if (this.#lastFeatureMouseEntered === featureId) {
+                    const location = this.#locationOnLine(+featureId, lngLat)
+                    if ('location' in location) {
+                        this.#featureEvent('mousemove', feature, location)
+                    }
                 }
             }
         }
@@ -1248,9 +1285,7 @@ export class UserInteractions
             this.activateFeature(feature)
             tooltipFeature = feature
         }
-        const lineFeatures = features.filter(feature => ('centreline' in feature.properties
-                                                      || ('type' in feature.properties
-                                                        && feature.properties.type.startsWith('line')) ))
+
         if (lineFeatures.length > 0) {
             tooltip = this.#lineTooltip(lineFeatures)
             tooltipFeature = lineFeatures[0]
