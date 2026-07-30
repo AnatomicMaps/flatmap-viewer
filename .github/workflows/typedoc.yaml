@@ -37,7 +37,7 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Install bun
-        run: npm install -g --allow-scripts=bun bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install packages
         run: bun install
