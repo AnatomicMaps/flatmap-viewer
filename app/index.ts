@@ -421,7 +421,7 @@ class StandaloneViewer
 
 //                console.log(map.flatmapLegend)
 
-                console.log(map.mapMetadata)
+//                console.log(map.mapMetadata)
 
 //                map.addDatasetMarkers([{id: '6', terms: ['UBERON:0018683']}]) // lumbar splanchnic nerve
 
