@@ -19,11 +19,19 @@ limitations under the License.
 ==============================================================================*/
 
 import Set from 'core-js/actual/set'
+import * as pmtiles from 'pmtiles'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 import * as turf from '@turf/helpers'
 import * as turfLength from "@turf/length"
+
+//==============================================================================
+
+// Handle `pmtiles` protocol
+
+const pmtilesProtocol = new pmtiles.Protocol()
+maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile)
 
 //==============================================================================
 
@@ -66,6 +74,7 @@ import {SearchIndex} from './search'
 
 import * as images from './images'
 import * as $rdf from './knowledge/rdf'
+import * as style from './layers/styling'
 import * as utils from './utils'
 
 //==============================================================================
@@ -80,6 +89,10 @@ export const UNCLASSIFIED_TAXON_ID = 'NCBITaxon:2787823';   // unclassified entr
 //==============================================================================
 
 const MAP_MAKER_FLIGHTPATHS_VERSION = 1.6
+
+//==============================================================================
+
+const TILESET_CDN_BASE: string|undefined = 'https://flatmap-tiles.t3.tigrisfiles.io/' // `undefined` if no CDN
 
 //==============================================================================
 
@@ -530,8 +543,18 @@ export class FlatMap
           this.#mapTermGraphLoaded = true
         }
 
+        let vectorLayerIds: string[]
+        const vectorTilesSource = this.#map.getSource(style.VECTOR_TILES_SOURCE)
+        if (vectorTilesSource?.url.startsWith('pmtiles://')) {
+            const pmTiles = new pmtiles.PMTiles(vectorTilesSource.url.slice(10))
+            const metadata = await pmTiles.getMetadata()
+            vectorLayerIds = metadata.vector_layers.map(layer => layer.id)
+        } else {
+            vectorLayerIds = vectorTilesSource.vectorLayerIds
+        }
+
         // Layers have now loaded so finish setting up
-        this.#userInteractions = new UserInteractions(this)
+        this.#userInteractions = new UserInteractions(this, vectorLayerIds)
 
         // Continue initialising when next idle
         this.#startupState = 1
@@ -782,6 +805,25 @@ export class FlatMap
     {
         if (url.startsWith('http://') || url.startsWith('https://')) {
             return url
+        } else if (url.startsWith('pmtiles:')) {
+            if (TILESET_CDN_BASE) {
+                let layerId = url.slice(8)
+                if (layerId.startsWith('/')) {
+                    if (layerId === '/') {
+                        layerId = '/index'
+                    }
+                    return  `pmtiles://${TILESET_CDN_BASE}${this.#uuid}${layerId}.pmtiles`
+                } else {
+                    return `pmtiles://${TILESET_CDN_BASE}${this.#uuid}/${layerId}.pmtiles`
+                }
+            } else {
+                const layerId = url.slice(8)
+                if (layerId.startsWith('/')) {
+                    return `pmtiles://${this.#baseUrl}${resource}${this.#uuid}/pmtiles${layerId}`
+                } else {
+                    return `pmtiles://${this.#baseUrl}${resource}${this.#uuid}/pmtiles/${layerId}`
+                }
+            }
         } else if (url.startsWith('/')) {
             // We don't want embedded `{` and `}` characters escaped
             return `${this.#baseUrl}${resource}${this.#uuid}${url}`

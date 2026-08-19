@@ -77,6 +77,7 @@ class FlatMapStylingLayer
     #parentLayer: FlatMapStylingLayer|null = null
     #rasterStyleLayers: RasterStyleLayer[] = []
     #separateLayers: boolean
+    #vectorLayerIds: string[] = []
     #vectorStyleLayers: VectorStyleLayer[] = []
 
     constructor(flatmap: FlatMap, ui: UserInteractions, layer: FlatMapLayer, options: StylingOptions)
@@ -88,6 +89,7 @@ class FlatMapStylingLayer
         this.#layerOptions = options
         this.#separateLayers = flatmap.options.separateLayers
         this.#pathsEnabled = !flatmap.options.pathsDisabled
+        this.#vectorLayerIds = ui.vectorLayerIds
 
         // Make sure image layer information is in its expected format
         const imageLayers = flatmap.details['image-layers'] && (layer['image-layers'] || false)
@@ -107,7 +109,7 @@ class FlatMapStylingLayer
         const layerId = `${layer.id}_${FEATURES_LAYER}`
         const source = flatmap.options.separateLayers ? layerId : FEATURES_LAYER
 
-        if (this.#map.getSource(style.VECTOR_TILES_SOURCE).vectorLayerIds.indexOf(source) >= 0) {
+        if (this.#vectorLayerIds.indexOf(source) >= 0) {
             const bodyLayer = new BodyStyleLayer(layerId, source)
             this.#addStylingLayer(bodyLayer.style(layer, this.#layerOptions), true)
             this.#vectorStyleLayers.push(bodyLayer)
@@ -147,7 +149,7 @@ class FlatMapStylingLayer
 
         if (haveVectorLayers) {
             const featuresVectorSource = this.#vectorSourceId(FEATURES_LAYER)
-            const vectorFeatures = vectorTileSource.vectorLayerIds.includes(featuresVectorSource)
+            const vectorFeatures = this.#vectorLayerIds.includes(featuresVectorSource)
             if (vectorFeatures) {
                 this.#addVectorStyleLayer(style.FeatureFillLayer, FEATURES_LAYER, false, true)
                 this.#addVectorStyleLayer(style.FeatureDashLineLayer, FEATURES_LAYER, false, true)
@@ -296,9 +298,7 @@ class FlatMapStylingLayer
     {
         const pathwaysVectorSource = this.#vectorSourceId(PATHWAYS_LAYER)
         if (this.#pathsEnabled
-         && this.#map.getSource('vector-tiles')
-                .vectorLayerIds
-                .includes(pathwaysVectorSource)) {
+         && this.#vectorLayerIds.includes(pathwaysVectorSource)) {
             this.#addVectorStyleLayer(style.AnnotatedPathLayer, PATHWAYS_LAYER, true, true)
 
             this.#addVectorStyleLayer(style.NerveCentrelineEdgeLayer, PATHWAYS_LAYER)
