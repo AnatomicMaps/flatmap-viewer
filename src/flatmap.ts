@@ -33,6 +33,10 @@ import * as turfLength from "@turf/length"
 const pmtilesProtocol = new pmtiles.Protocol()
 maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile)
 
+interface PMTilesMetadata {
+     vector_layers: { id: string }[]
+}
+
 //==============================================================================
 
 // Load our stylesheet last so we can overide styling rules
@@ -544,13 +548,14 @@ export class FlatMap
         }
 
         let vectorLayerIds: string[]
-        const vectorTilesSource = this.#map.getSource(style.VECTOR_TILES_SOURCE)
-        if (vectorTilesSource?.url.startsWith('pmtiles://')) {
+        const vectorTilesSource = this.#map.getStyle().sources[style.VECTOR_TILES_SOURCE] as maplibregl.VectorSourceSpecification
+        if ('url' in vectorTilesSource && vectorTilesSource.url.startsWith('pmtiles://')) {
             const pmTiles = new pmtiles.PMTiles(vectorTilesSource.url.slice(10))
-            const metadata = await pmTiles.getMetadata()
+            const metadata: PMTilesMetadata = await pmTiles.getMetadata() as PMTilesMetadata
             vectorLayerIds = metadata.vector_layers.map(layer => layer.id)
         } else {
-            vectorLayerIds = vectorTilesSource.vectorLayerIds
+            // @ts-expect-error
+            vectorLayerIds = vectorTilesSource.vector_layers.map(layer => layer.id)
         }
 
         // Layers have now loaded so finish setting up
