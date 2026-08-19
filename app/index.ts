@@ -42,8 +42,7 @@ const MINIMAP = false; // { width: '10%', background: '#FCC' };
 const MAP_ENDPOINTS = {
     local: 'http://localhost:8000',
     curation: 'https://mapcore-demo.org/curation/flatmap/',
-    devel: 'https://staging.mapcore-demo.org/devel/flatmap/v4/',
-    fccb: 'https://mapcore-demo.org/fccb/flatmap/',
+    devel: 'https://mapcore-demo.org/devel/flatmap/v4/',
     production: 'https://mapcore-demo.org/current/flatmap/v3/',
     staging: 'https://mapcore-demo.org/staging/flatmap/v1/',
 }
@@ -422,7 +421,7 @@ class StandaloneViewer
 
 //                console.log(map.flatmapLegend)
 
-                console.log(map.mapMetadata)
+//                console.log(map.mapMetadata)
 
 //                map.addDatasetMarkers([{id: '6', terms: ['UBERON:0018683']}]) // lumbar splanchnic nerve
 

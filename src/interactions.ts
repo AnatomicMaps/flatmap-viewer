@@ -203,11 +203,12 @@ export class UserInteractions
     #resetOnClickEnabled: boolean = true
     #collectingActiveFeatures: boolean = false
     #nextActiveFeatures: Map<GeoJSONId, MapFeature>|null = null
-
-    constructor(flatmap: FlatMap)
+    #vectorLayerIds: string[]
+    constructor(flatmap: FlatMap, vectorLayerIds: string[])
     {
         this.#flatmap = flatmap
         this.#map = flatmap.map
+        this.#vectorLayerIds = vectorLayerIds
 
         // Default colour settings
         this.#colourOptions = {coloured: true, outlined: true}
@@ -372,6 +373,12 @@ export class UserInteractions
     //===========
     {
         return this.#minimap
+    }
+
+    get vectorLayerIds()
+    //==================
+    {
+        return this.#vectorLayerIds
     }
 
     closeMinimap()
