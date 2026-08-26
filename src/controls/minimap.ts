@@ -181,18 +181,14 @@ export class MinimapControl
     }
 
 
-    initialise(immediate: boolean=false)
-    //==================================
+    initialise()
+    //==========
     {
-        if (immediate) {
+        // Wait until styles etc have loaded before completing initialisation
+        const loadSubscription = this.#miniMap.on('load', async() => {
             this.#initialise()
-        } else {
-            // Wait until styles etc have loaded befor completing initialisation
-            const idleSubscription = this.#miniMap.on('idle', async() => {
-                this.#initialise()
-                idleSubscription.unsubscribe()
-            })
-        }
+            loadSubscription.unsubscribe()
+        })
     }
 
     #initialise()

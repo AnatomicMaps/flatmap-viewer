@@ -248,6 +248,7 @@ export class FlatMap
     #idToAnnotation: Map<GeoJSONId, FlatMapFeatureAnnotation> = new Map()
     #knowledgeSource = ''
     #map: maplibregl.Map|null = null
+    #mapLoaded = false
     #mapMetadata: FlatMapMetadata
     #mapServer: FlatMapServer
     #mapSourceToFeatureIds: FeatureIdMap = new Map()
@@ -260,7 +261,6 @@ export class FlatMap
     #pathways: FlatMapPathways
     #rdfStore = new $rdf.RdfStore()
     #searchIndex: SearchIndex = new SearchIndex()
-    #startupState = -1
     #style: FlatMapStyleSpecification
     #taxon: string|null
     #taxonNames = new Map()
@@ -383,7 +383,6 @@ export class FlatMap
             canvas.removeEventListener('webglcontextlost', this.#contextLostCallback, false);
             this.#map.remove()
             this.#contextLost = true
-            this.#startupState = -1
             this.callback('context-lost', undefined)
 
             // Prevent the browser's default behavior
@@ -466,103 +465,86 @@ export class FlatMap
         //this.#map.dragRotate.disable()
         //this.#map.touchZoomRotate.disableRotation()
 
-        // Finish initialisation when all sources have loaded
-        // and map has rendered
+        // Finish initialisation when all sources and styles have loaded
 
-        const idleSubscription = this.#map.on('idle', async() => {
-
-            if (this.#startupState === -1) {
-                this.#startupState = 0
-                await this.#setupUserInteractions()
-            } else if (this.#startupState === 1) {
-                this.#startupState = 2
-                this.#map.setRenderWorldCopies(true)
-                this.#bounds = this.#map.getBounds()
-                if (this.#bounds.getEast() >= 180) {
-                    this.#bounds.setNorthEast(new maplibregl.LngLat(179.9, this.#bounds.getNorth()))
-                }
-                if (this.#bounds.getWest() <= -180) {
-                    this.#bounds.setSouthWest(new maplibregl.LngLat(-179.9, this.#bounds.getSouth()))
-                }
-                const bounds = this.#bounds.toArray()
-                const sw = maplibregl.MercatorCoordinate.fromLngLat(bounds[0])
-                const ne = maplibregl.MercatorCoordinate.fromLngLat(bounds[1])
-                this.#normalisedOrigin = [sw.x, ne.y]
-                this.#normalised_size = [ne.x - sw.x, sw.y - ne.y]
-                if ('state' in this.#options) {
-                    this.#userInteractions.setState(this.#options.state)
-                }
-                this.#initialState = this.getState()
-                if (this.#userInteractions.minimap) {
-                    this.#userInteractions.minimap.initialise(true)
-                }
-                this.#map.setMaxBounds(this.#bounds)
-                this.#map.fitBounds(this.#bounds, {animate: false})
-                this.#startupState = 3
-
-
-                // Trigger a context-restored callback
-
-                if (this.#contextLost) {
-                  this.callback('context-restored', undefined)
-                  this.#contextLost = false
-                }
-
-                idleSubscription.unsubscribe()
-
+        const loadSubscription = this.#map.on('load', async() => {
+            // Get names of the taxons we have
+            await this.#setTaxonName(this.#taxon)
+            for (const taxon of this.taxonIdentifiers) {
+                await this.#setTaxonName(taxon)
             }
+
+            // Load any images required by the map
+            for (const image of this.#options.images || []) {
+                await this.#addImage(image.id, image.url, '', image.options)
+            }
+
+            // Load icons used for clustered markers
+            await loadMarkerIcons(this.#map)
+
+            // Load anatomical term hierarchy for the flatmap, this is not required
+            // again after it has been loaded once
+            if (!this.#mapTermGraphLoaded) {
+              const termGraph = (await this.#mapServer.mapTermGraph(this.#uuid))
+              this.#mapTermGraph.load(termGraph)
+              this.#mapTermGraphLoaded = true
+            }
+
+            let vectorLayerIds: string[]
+            const vectorTilesSource = this.#map.getStyle().sources[style.VECTOR_TILES_SOURCE] as maplibregl.VectorSourceSpecification
+            if ('url' in vectorTilesSource && vectorTilesSource.url.startsWith('pmtiles://')) {
+                const pmTiles = new pmtiles.PMTiles(vectorTilesSource.url.slice(10))
+                const metadata: PMTilesMetadata = await pmTiles.getMetadata() as PMTilesMetadata
+                vectorLayerIds = metadata.vector_layers.map(layer => layer.id)
+            } else {
+                // @ts-expect-error
+                vectorLayerIds = vectorTilesSource.vector_layers.map(layer => layer.id)
+            }
+
+            // Layers have now loaded so finish setting up
+            this.#userInteractions = new UserInteractions(this, vectorLayerIds)
+
+            this.#map.setRenderWorldCopies(true)
+            this.#bounds = this.#map.getBounds()
+            if (this.#bounds.getEast() >= 180) {
+                this.#bounds.setNorthEast(new maplibregl.LngLat(179.9, this.#bounds.getNorth()))
+            }
+            if (this.#bounds.getWest() <= -180) {
+                this.#bounds.setSouthWest(new maplibregl.LngLat(-179.9, this.#bounds.getSouth()))
+            }
+            const bounds = this.#bounds.toArray()
+            const sw = maplibregl.MercatorCoordinate.fromLngLat(bounds[0])
+            const ne = maplibregl.MercatorCoordinate.fromLngLat(bounds[1])
+            this.#normalisedOrigin = [sw.x, ne.y]
+            this.#normalised_size = [ne.x - sw.x, sw.y - ne.y]
+            if ('state' in this.#options) {
+                this.#userInteractions.setState(this.#options.state)
+            }
+            this.#initialState = this.getState()
+            if (this.#userInteractions.minimap) {
+                this.#userInteractions.minimap.initialise()
+            }
+            this.#map.setMaxBounds(this.#bounds)
+            this.#map.fitBounds(this.#bounds, {animate: false})
+
+            // Trigger a context-restored callback
+
+            if (this.#contextLost) {
+              this.callback('context-restored', undefined)
+              this.#contextLost = false
+            }
+
+            this.#mapLoaded = true
+            loadSubscription.unsubscribe()
         })
     }
 
     async mapLoaded()
     //===============
     {
-        while (this.#startupState < 3) {
+        while (!this.#mapLoaded) {
             await utils.wait(10)
         }
-    }
-
-    async #setupUserInteractions()
-    //============================
-    {
-        // Get names of the taxons we have
-        await this.#setTaxonName(this.#taxon)
-        for (const taxon of this.taxonIdentifiers) {
-            await this.#setTaxonName(taxon)
-        }
-
-        // Load any images required by the map
-        for (const image of this.#options.images || []) {
-            await this.#addImage(image.id, image.url, '', image.options)
-        }
-
-        // Load icons used for clustered markers
-        await loadMarkerIcons(this.#map)
-
-        // Load anatomical term hierarchy for the flatmap, this is not required
-        // again after it has been loaded once
-        if (!this.#mapTermGraphLoaded) {
-          const termGraph = (await this.#mapServer.mapTermGraph(this.#uuid))
-          this.#mapTermGraph.load(termGraph)
-          this.#mapTermGraphLoaded = true
-        }
-
-        let vectorLayerIds: string[]
-        const vectorTilesSource = this.#map.getStyle().sources[style.VECTOR_TILES_SOURCE] as maplibregl.VectorSourceSpecification
-        if ('url' in vectorTilesSource && vectorTilesSource.url.startsWith('pmtiles://')) {
-            const pmTiles = new pmtiles.PMTiles(vectorTilesSource.url.slice(10))
-            const metadata: PMTilesMetadata = await pmTiles.getMetadata() as PMTilesMetadata
-            vectorLayerIds = metadata.vector_layers.map(layer => layer.id)
-        } else {
-            // @ts-expect-error
-            vectorLayerIds = vectorTilesSource.vector_layers.map(layer => layer.id)
-        }
-
-        // Layers have now loaded so finish setting up
-        this.#userInteractions = new UserInteractions(this, vectorLayerIds)
-
-        // Continue initialising when next idle
-        this.#startupState = 1
     }
 
     /**
