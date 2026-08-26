@@ -403,11 +403,13 @@ class StandaloneViewer
         window.history.pushState('data', document.title, this.#requestUrl)
 
         const loadStartTime = performance.now()
+document.getElementById('map-load').textContent = '--'
         await this.#paneManager.loadMap(viewer, id, this.mapCallback.bind(this), this.#mapOptions)
         .then(map => {
             if (map) {
                 const loadTime = performance.now() - loadStartTime
                 console.log(`Map loaded in ${loadTime.toFixed(0)} ms`)
+document.getElementById('map-load').textContent = `${loadTime.toFixed(0)} ms`
                 this.#currentMap = map
                 if (this.#mapProvenance && PROVENANCE_DISPLAY) {
                     this.#mapProvenance.style.display = 'block'

@@ -94,6 +94,19 @@
         height: 3px !important;
         width: 100%;
       }
+      #metrics {
+        position: absolute;
+        top: 44px;
+        left: 17px;
+        background: #eee;
+        padding: 10px 14px;
+        border-radius: .4rem;
+        font-family: sans-serif;
+        font-size: 14px;
+        z-index: 100;
+      }
+      #metrics div { margin: 4px 0; }
+      #metrics span { font-weight: bold; }
     </style>
   </head>
   <body>
@@ -111,6 +124,9 @@
           <label for="server-selector">Map server:</label>
           <select id="server-selector" class="selector"></select>
         </span>
+      </div>
+      <div id="metrics">
+          <div>Load: <span id="map-load">—</span></div>
       </div>
       <div id="content">
         <div id="flatmap-viewer-canvas"></div>
