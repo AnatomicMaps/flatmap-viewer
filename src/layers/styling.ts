@@ -105,7 +105,7 @@ export function uniformZoomScaling(expression: ExpressionSpecification|Expressio
             ['exponential', 2],
             ['zoom'],
             2, ["*", ['var', 'unscaled'], ["^", 2, -2]],
-            12, ["*", ['var', 'unscaled'], ["^", 2, 8]]
+            12, ["*", ['var', 'unscaled'], ["^", 2, 6]]
         ]
     ]
 }
@@ -764,9 +764,9 @@ export class PathLineLayer extends VectorStyleLayer
                     "*",
                     this.#highlight ? ['case',
                         ['boolean', ['feature-state', 'selected'], false], [
-                            'case', ['boolean', ['feature-state', 'active'], false], 2.0,
+                            'case', ['boolean', ['feature-state', 'active'], false], 1.2,
                                 0.9],
-                        ['boolean', ['feature-state', 'active'], false], 1.8,
+                        ['boolean', ['feature-state', 'active'], false], 1.2,
                         0.0
                     ] : [
                      'case',
