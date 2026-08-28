@@ -92,7 +92,7 @@ export function markerZoomScaling(expression: ExpressionSpecification|Expression
             ['exponential', 2],
             ['zoom'],
             2, ["*", ['var', 'unscaled'], ["^", 2, 0.5]],
-            12, ["*", ['var', 'unscaled'], ["^", 2, 6]]
+            12, ["*", ['var', 'unscaled'], ["^", 2, 4]]
         ]
     ]
 }
