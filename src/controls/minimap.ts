@@ -143,7 +143,7 @@ export class MinimapControl
         const mapCanvasElement = map.getCanvas()
         let width: number
         if (typeof this.#options.width === 'string') {
-            width = parseInt(this.#options.width)
+            width = parseInt(this.#options.width, 10)
             if (this.#options.width.includes('%')) {
                 width = width*mapCanvasElement.width/100
             }
@@ -205,7 +205,9 @@ export class MinimapControl
             'dragPan', 'scrollZoom', 'boxZoom', 'dragRotate',
             'keyboard', 'doubleClickZoom', 'touchZoomRotate'
         ]
-        interactions.forEach(i => miniMap[i].disable())
+        interactions.forEach(i => {
+            miniMap[i].disable()
+        })
 
         // Set background if specified (default is the parent map's)
 

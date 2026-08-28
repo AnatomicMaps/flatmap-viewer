@@ -27,8 +27,7 @@ import type {
 //==============================================================================
 
 import type {FlatMap} from '../flatmap'
-import type {DatasetMarkerResult, DatasetTerms, MarkerKind} from '../flatmap-types'
-import type {GeoJSONId} from '../flatmap-types'
+import type {DatasetMarkerResult, DatasetTerms, GeoJSONId, MarkerKind} from '../flatmap-types'
 import type {UserInteractions} from '../interactions'
 import {ANATOMICAL_ROOT, type MapTermGraph} from '../knowledge'
 import type {DiGraph} from '../knowledge/graphs'
