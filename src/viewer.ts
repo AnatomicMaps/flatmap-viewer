@@ -327,9 +327,11 @@ export class MapViewer
 
         const mapMetadata: FlatMapMetadata|null = (await this.#mapServer.mapMetadata(mapId))
 
-        // Get RDF knowledge for the map
+        // Get any RDF knowledge for the map
 
-        const mapKnowledge: string|undefined = (await this.#mapServer.mapKnowledge(mapId))
+        const mapKnowledge: string|undefined = 'rdf' in mapIndex
+                                             ? (await this.#mapServer.mapKnowledge(mapId))
+                                             : undefined
 
         // Set zoom range if not specified as an option
 
