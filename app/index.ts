@@ -417,11 +417,6 @@ document.getElementById('map-load').textContent = `${loadTime.toFixed(0)} ms`
                     this.#mapProvenance.innerHTML = provenanceAsHtml(Object.assign({server: this.#mapEndpoints[this.#currentServer!]},
                                                                      map.mapMetadata))
                 }
-                map.addMarkers([
-                    'cvs:functional.whole-body',
-                    'cvs:functional.tissue',
-                    'cvs:functional.cell'
-                ], {kind: 'multiscale'})
 //                map.setPaint({ coloured: false, outlined: false })
 
 //                console.log(map.flatmapLegend)
