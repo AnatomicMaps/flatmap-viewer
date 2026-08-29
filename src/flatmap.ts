@@ -208,6 +208,7 @@ export type MapDescription = {
 
 type FeatureIdMap = Map<string, GeoJSONId[]>
 
+const labelCache: Map<string, string> = new Map()
 
 /**
  * Maps are not created directly but instead are created and loaded by
@@ -254,7 +255,6 @@ export class FlatMap
     #searchIndex: SearchIndex = new SearchIndex()
     #style: FlatMapStyleSpecification
     #taxon: string|null
-    #taxonNames = new Map()
     #taxonToFeatureIds: FeatureIdMap = new Map()
     #userInteractions: UserInteractions|null = null
     #url: string
@@ -1181,8 +1181,8 @@ export class FlatMap
     taxonName(taxonId: string): string
     //================================
     {
-        if (this.#taxonNames.has(taxonId)) {
-            return this.#taxonNames.get(taxonId)
+        if (labelCache.has(taxonId)) {
+            return labelCache.get(taxonId)
         }
         return taxonId
     }
@@ -1190,10 +1190,10 @@ export class FlatMap
     async #setTaxonName(taxonId: string|null)
     //=======================================
     {
-        if (taxonId && !this.#taxonNames.has(taxonId)) {
+        if (taxonId) {
             const result = await this.queryLabels(taxonId)
-            if (result.length && 'label' in result[0]) {
-                return this.#taxonNames.set(taxonId, result[0]['label'])
+            if (result.length) {
+                return result[0]?.label
             }
         }
     }
@@ -2312,36 +2312,57 @@ export class FlatMap
         const entityArray = Array.isArray(entities) ? entities
                           : entities ? [entities]
                           : []
-        if (entityArray.length > 0) {
+        const queryEntities: string[] = []
+        for (const entity of entityArray) {
+            if (labelCache.has(entity)) {
+                entityLabels.push({
+                    entity: entity,
+                    label: labelCache.get(entity)
+                })
+            } else if (entity.includes(':')) {
+                // A CURIE or URI
+                queryEntities.push(entity)
+            } else {
+                entityLabels.push({
+                    entity: entity,
+                    label: entity
+                })
+                labelCache.set(entity, entity)
+            }
+        }
+        if (queryEntities.length > 0) {
             if (this.#mapServer.knowledgeSchema >= KNOWLEDGE_SOURCE_SCHEMA) {
                 const rows = await this.#mapServer.queryKnowledge(
                                     `select source, entity, knowledge from knowledge
                                         where (source=? or source is null)
-                                           and entity in (?${', ?'.repeat(entityArray.length-1)})
+                                           and entity in (?${', ?'.repeat(queryEntities.length-1)})
                                         order by entity, source desc`,
-                                    [this.#knowledgeSource, ...entityArray])
+                                    [this.#knowledgeSource, ...queryEntities])
                 let last_entity: string|null = null
                 for (const row of rows) {
                     // In entity, source[desc] order; we use the most recent label
                     if (row[1] !== last_entity) {
                         const knowledge = JSON.parse(row[2])
+                        const label = knowledge['label'] || row[1]
                         entityLabels.push({
                             entity: row[1],
-                            label: knowledge['label'] || row[1]
+                            label: label
                         })
+                        labelCache.set(row[1], label)
                         last_entity = row[1]
                     }
                 }
             } else {
                 const rows = await this.#mapServer.queryKnowledge(
                                     `select entity, label from labels
-                                        where entity in (?${', ?'.repeat(entityArray.length-1)})`,
-                                    entityArray)
-                return rows.map(entityLabel => {
-                    return {
+                                        where entity in (?${', ?'.repeat(queryEntities.length-1)})`,
+                                    queryEntities)
+                rows.forEach(entityLabel => {
+                    entityLabels.push({
                         entity: entityLabel[0],
                         label: entityLabel[1]
-                    }
+                    })
+                    labelCache.set(entityLabel[0], entityLabel[1])
                 })
             }
         }
