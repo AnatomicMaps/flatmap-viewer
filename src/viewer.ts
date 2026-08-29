@@ -340,7 +340,7 @@ export class MapViewer
         const mapMetadata: FlatMapMetadata|null = mapIndex?.mapMetadata
                                                || (await this.#mapServer.mapMetadata(mapId))
 
-        // Get any RDF knowledge for the map
+        // Get any  RDF knowledge for the map
 
         const mapKnowledge: string|undefined = 'rdf' in mapIndex
                                              ? (await this.#mapServer.mapKnowledge(mapId))
