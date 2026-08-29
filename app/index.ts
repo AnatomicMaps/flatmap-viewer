@@ -425,14 +425,16 @@ document.getElementById('map-tiles').textContent = '--'
                 const loadTime = performance.now() - loadStartTime
                 console.log(`  Map loaded in ${loadTime.toFixed(0)} ms`)
 document.getElementById('map-load').textContent = `${loadTime.toFixed(0)} ms`
-                map.map.once('idle', () => {
-                    const readyTime = performance.now() - loadStartTime
-                    const tilesTime = readyTime - loadTime
-                    console.log(`  Tiles loaded in ${tilesTime.toFixed(0)} ms`)
-                    console.log(`  Map ready in ${readyTime.toFixed(0)} ms`)
+                if (map.map) {
+                    map.map.once('idle', () => {
+                        const readyTime = performance.now() - loadStartTime
+                        const tilesTime = readyTime - loadTime
+                        console.log(`  Tiles loaded in ${tilesTime.toFixed(0)} ms`)
+                        console.log(`  Map ready in ${readyTime.toFixed(0)} ms`)
 document.getElementById('map-tiles').textContent = `${tilesTime.toFixed(0)} ms`
 document.getElementById('map-ready').textContent = `${readyTime.toFixed(0)} ms`
-                })
+                    })
+                }
                 this.#currentMap = map
                 if (this.#mapProvenance && PROVENANCE_DISPLAY) {
                     this.#mapProvenance.style.display = 'block'
