@@ -41,6 +41,7 @@ const MINIMAP = false; // { width: '10%', background: '#FCC' };
 
 const MAP_ENDPOINTS = {
     local: 'http://localhost:8000',
+    celldl: 'https://flatmaps.celldl.org/',
     curation: 'https://mapcore-demo.org/curation/flatmap/',
     devel: 'https://mapcore-demo.org/devel/flatmap/v4/',
     production: 'https://mapcore-demo.org/current/flatmap/v3/',
