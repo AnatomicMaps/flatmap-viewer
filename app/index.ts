@@ -372,7 +372,12 @@ class StandaloneViewer
         const loadTime = performance.now() - windowStartTime
         console.log(`Viewer ready in ${loadTime.toFixed(0)} ms`)
 document.getElementById('win-load').textContent = `${loadTime.toFixed(0)} ms`
-        await this.loadMap(this.#currentViewer, this.#mapId, this.#mapTaxon, this.#mapSex)
+        const mapLoaded = await this.loadMap(this.#currentViewer, this.#mapId, this.#mapTaxon, this.#mapSex)
+        if (!mapLoaded) {
+            this.#mapId = this.#mapSelector.options[1].value
+            this.#mapSelector.options[1].selected = true
+            await this.loadMap(this.#currentViewer, this.#mapId, this.#mapTaxon, this.#mapSex)
+        }
     }
 
     setGenerationSelector(mapId: string)
@@ -390,8 +395,8 @@ document.getElementById('win-load').textContent = `${loadTime.toFixed(0)} ms`
         this.#mapGeneration.innerHTML = generationList.join('')
     }
 
-    async loadMap(viewer: MapViewer, id: string, taxon: string|null=null, sex: string|null=null)
-    //==========================================================================================
+    async loadMap(viewer: MapViewer, id: string, taxon: string|null=null, sex: string|null=null): Promise<boolean>
+    //============================================================================================================
     {
         this.#mapProvenance.innerHTML = ''
         if (id !== null) {
@@ -422,6 +427,7 @@ document.getElementById('loading').hidden = false
         const options = Object.assign({}, this.#mapOptions, {
             indexExtensions: this.#mapIdToMap.get(id)?.indexExtensions
         })
+        let mapLoaded = false
         await this.#paneManager.loadMap(viewer, id, this.mapCallback.bind(this), options)
         .then(map => {
             if (map) {
@@ -444,8 +450,9 @@ document.getElementById('loading').hidden = true
                 this.#viewMapId = mapIds.uuid
                 this.#viewMapSex = mapIds.biologicalSex
                 this.#viewMapTaxon = mapIds.taxon
-
                 this.#currentMap = map
+                mapLoaded = true
+
                 if (this.#mapProvenance && PROVENANCE_DISPLAY) {
                     this.#mapProvenance.style.display = 'block'
                     // biome-ignore lint/style/noNonNullAssertion: we have a server
@@ -484,6 +491,7 @@ document.getElementById('loading').hidden = true
             document.getElementById('loading').hidden = true
             alert(error)
         })
+        return mapLoaded
     }
 
     async mapCallback(eventType: string, data: Record<string, any>)
