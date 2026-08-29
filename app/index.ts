@@ -414,6 +414,7 @@ document.getElementById('win-load').textContent = `${loadTime.toFixed(0)} ms`
 document.getElementById('map-load').textContent = '--'
 document.getElementById('map-ready').textContent = '--'
 document.getElementById('map-tiles').textContent = '--'
+document.getElementById('loading').hidden = false
         console.log('Starting map load...')
 
         const options = Object.assign({}, this.#mapOptions, {
@@ -433,6 +434,7 @@ document.getElementById('map-load').textContent = `${loadTime.toFixed(0)} ms`
                         console.log(`  Map ready in ${readyTime.toFixed(0)} ms`)
 document.getElementById('map-tiles').textContent = `${tilesTime.toFixed(0)} ms`
 document.getElementById('map-ready').textContent = `${readyTime.toFixed(0)} ms`
+document.getElementById('loading').hidden = true
                     })
                 }
                 this.#currentMap = map
@@ -471,6 +473,7 @@ document.getElementById('map-ready').textContent = `${readyTime.toFixed(0)} ms`
         })
         .catch(error => {
             console.log(error)
+            document.getElementById('loading').hidden = true
             alert(error)
         })
     }

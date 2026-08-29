@@ -107,6 +107,33 @@
       }
       #metrics div { margin: 4px 0; width: 120px; }
       #metrics span { font-weight: bold; float: right; }
+      #loading {
+        position: absolute;
+        top: calc(40vh - 100px);
+        left: calc(50vw - 100px);
+      }
+      #loading span {
+        position: relative;
+        top: -140px;
+        left: 40px;
+        font-size: 2em;
+      }
+      #spinner {
+        width: 200px;
+        height: 200px;
+        border: 25px solid lightgray;
+        border-top: 25px solid #3498db;
+        border-radius: 50%;
+        animation: spin 2s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
@@ -135,6 +162,10 @@
       <div id="content">
         <div id="flatmap-viewer-canvas"></div>
         <div id="provenance-display"></div>
+      </div>
+      <div id="loading" hidden>
+        <div id="spinner"></div>
+        <span>Map loading...</span>
       </div>
     </div>
   </body>
