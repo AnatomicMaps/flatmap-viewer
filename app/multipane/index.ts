@@ -41,6 +41,7 @@ export class PaneManager
     #mapsContainer: HTMLElement
     #mapPanes: HorizontalPanes
     #maxPanes: number
+    #mapServerUrl: string = ''
     #mode: WindowMode = 'single'
     #verticalPanes: VerticalPanes
 
@@ -100,15 +101,17 @@ export class PaneManager
                   options: FlatMapOptions={}, newPane: boolean=false): Promise<FlatMap|null>
     //======================================================================================
     {
-        // Don't load an already open map
         const map = await viewer.findMap(mapId)
         if (map === null) {
             throw new Error(`Unknown map: ${JSON.stringify(mapId)}`)
         }
         const mapUuid = map.uuid || map.id
-        for (const flatmap of this.#mapsByPane.values()) {
-            if (mapUuid === flatmap.uuid) {
-                return flatmap
+        if (viewer.mapServerUrl === this.#mapServerUrl) {
+            // Don't load an already open map
+            for (const flatmap of this.#mapsByPane.values()) {
+                if (mapUuid === flatmap.uuid) {
+                    return flatmap
+                }
             }
         }
         const mapIndex = (await viewer.mapServer.mapIndex(mapUuid))!
