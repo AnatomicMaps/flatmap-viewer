@@ -438,6 +438,12 @@ document.getElementById('map-ready').textContent = `${readyTime.toFixed(0)} ms`
 document.getElementById('loading').hidden = true
                     })
                 }
+                // Remember the map we have just loaded
+                const mapIds = map.getIdentifier()
+                this.#viewMapId = mapIds.uuid
+                this.#viewMapSex = mapIds.biologicalSex
+                this.#viewMapTaxon = mapIds.taxon
+
                 this.#currentMap = map
                 if (this.#mapProvenance && PROVENANCE_DISPLAY) {
                     this.#mapProvenance.style.display = 'block'
