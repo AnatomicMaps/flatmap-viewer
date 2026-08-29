@@ -58,7 +58,7 @@ const DEFAULT_OPTIONS = {
     maxZoom: 12.99
 }
 
-const browserStartTime = performance.now()
+let windowStartTime = performance.now()
 
 window.onload = async () => {
     const requestUrl = new URL(window.location.href)
@@ -257,6 +257,7 @@ class StandaloneViewer
         if (this.#currentMap) {
             this.#currentMap.close()
         }
+        windowStartTime = performance.now()
         this.#currentViewer = new MapViewer(this.#mapEndpoints[server], {
             container: '',
             images: [
@@ -367,7 +368,7 @@ class StandaloneViewer
         }
 
         this.setGenerationSelector(this.#mapId)
-        const loadTime = performance.now() - browserStartTime
+        const loadTime = performance.now() - windowStartTime
         console.log(`Viewer ready in ${loadTime.toFixed(0)} ms`)
 document.getElementById('win-load').textContent = `${loadTime.toFixed(0)} ms`
         await this.loadMap(this.#currentViewer, this.#mapId, this.#mapTaxon, this.#mapSex)
