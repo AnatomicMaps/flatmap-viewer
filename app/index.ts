@@ -60,7 +60,7 @@ const DEFAULT_OPTIONS = {
 
 const browserStartTime = performance.now()
 
-window.onload = () => {
+window.onload = async () => {
     const requestUrl = new URL(window.location.href)
     const requestPathParts = requestUrl.pathname.split('/')
     const requestEndpoint = requestUrl.origin + (requestPathParts.slice(0, (requestPathParts[requestPathParts.length - 1] === '') ? -2 : -1)
@@ -71,7 +71,7 @@ window.onload = () => {
      && 'local' in MAP_ENDPOINTS) {
         MAP_ENDPOINTS.local = requestUrl.origin
     }
-    standaloneViewer(MAP_ENDPOINTS, {
+    await standaloneViewer(MAP_ENDPOINTS, {
         debug: DEBUG,
         minimap: MINIMAP
     })
@@ -345,13 +345,13 @@ class StandaloneViewer
             const value = (<HTMLSelectElement>e.target).value
             if (value !== '') {
                 this.setGenerationSelector(value)
-                await this.loadMap(this.#currentViewer!, value)
+                await this.loadMap(this.#currentViewer, value)
             }
         }
         this.#mapGeneration.onchange = async (e: Event) => {
             const value = (<HTMLSelectElement>e.target).value
             if (value !== '') {
-                await this.loadMap(this.#currentViewer!, value)
+                await this.loadMap(this.#currentViewer, value)
             }
         }
 
@@ -363,11 +363,11 @@ class StandaloneViewer
             this.#mapSelector.options[1].selected = true
         }
 
-        this.setGenerationSelector(this.#mapId!)
+        this.setGenerationSelector(this.#mapId)
         const loadTime = performance.now() - browserStartTime
         console.log(`Viewer ready in ${loadTime.toFixed(0)} ms`)
 document.getElementById('win-load').textContent = `${loadTime.toFixed(0)} ms`
-        await this.loadMap(this.#currentViewer!, this.#mapId!, this.#mapTaxon, this.#mapSex)
+        await this.loadMap(this.#currentViewer, this.#mapId, this.#mapTaxon, this.#mapSex)
     }
 
     setGenerationSelector(mapId: string)
