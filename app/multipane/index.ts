@@ -18,11 +18,11 @@ limitations under the License.
 
 ******************************************************************************/
 
-import { FlatMap, FlatMapOptions, MapViewer } from '../../lib'
+import type { FlatMap, FlatMapOptions, MapViewer } from '../../lib'
 
-import { ControlEventData, FlatMapCallback } from '../../src/flatmap-types'
+import type { ControlEventData, FlatMapCallback } from '../../src/flatmap-types'
 //import { SvgMap, SvgViewer } from '../../src/svgviewer'
-import { MapIdentifier } from '../../src/viewer'
+import type { MapIdentifier } from '../../src/viewer'
 
 //==============================================================================
 

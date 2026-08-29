@@ -494,8 +494,8 @@ document.getElementById('loading').hidden = true
         return mapLoaded
     }
 
-    async mapCallback(eventType: string, data: Record<string, any>)
-    //=============================================================
+    async mapCallback(eventType: string, data: Record<string, unknown>)
+    //=================================================================
     {
         if (data.type === 'control' && data.control === 'background') {
             this.#mapOptions.background = data.value
