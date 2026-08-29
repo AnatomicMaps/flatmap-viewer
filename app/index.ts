@@ -58,6 +58,8 @@ const DEFAULT_OPTIONS = {
     maxZoom: 12.99
 }
 
+const browserStartTime = performance.now()
+
 window.onload = () => {
     const requestUrl = new URL(window.location.href)
     const requestPathParts = requestUrl.pathname.split('/')
@@ -362,6 +364,8 @@ class StandaloneViewer
         }
 
         this.setGenerationSelector(this.#mapId!)
+        const loadTime = performance.now() - browserStartTime
+        console.log(`Viewer ready in ${loadTime.toFixed(0)} ms`)
         await this.loadMap(this.#currentViewer!, this.#mapId!, this.#mapTaxon, this.#mapSex)
     }
 
@@ -404,12 +408,19 @@ class StandaloneViewer
 
         const loadStartTime = performance.now()
 document.getElementById('map-load').textContent = '--'
+        console.log('Starting map load...')
         await this.#paneManager.loadMap(viewer, id, this.mapCallback.bind(this), this.#mapOptions)
         .then(map => {
             if (map) {
                 const loadTime = performance.now() - loadStartTime
-                console.log(`Map loaded in ${loadTime.toFixed(0)} ms`)
+                console.log(`  Map loaded in ${loadTime.toFixed(0)} ms`)
 document.getElementById('map-load').textContent = `${loadTime.toFixed(0)} ms`
+                map.map.once('idle', () => {
+                    const readyTime = performance.now() - loadStartTime
+                    const tilesTime = readyTime - loadTime
+                    console.log(`  Tiles loaded in ${tilesTime.toFixed(0)} ms`)
+                    console.log(`  Map ready in ${readyTime.toFixed(0)} ms`)
+                })
                 this.#currentMap = map
                 if (this.#mapProvenance && PROVENANCE_DISPLAY) {
                     this.#mapProvenance.style.display = 'block'
