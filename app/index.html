@@ -105,8 +105,8 @@
         font-size: 14px;
         z-index: 100;
       }
-      #metrics div { margin: 4px 0; }
-      #metrics span { font-weight: bold; }
+      #metrics div { margin: 4px 0; width: 120px; }
+      #metrics span { font-weight: bold; float: right; }
     </style>
   </head>
   <body>
@@ -126,7 +126,11 @@
         </span>
       </div>
       <div id="metrics">
-          <div>Load: <span id="map-load">—</span></div>
+          <div>Window: <span id="win-load">—</span></div>
+          <div>&nbsp;</div>
+          <div>Map: <span id="map-load">—</span></div>
+          <div>Tiles: <span id="map-tiles">—</span></div>
+          <div>Ready: <span id="map-ready">—</span></div>
       </div>
       <div id="content">
         <div id="flatmap-viewer-canvas"></div>
