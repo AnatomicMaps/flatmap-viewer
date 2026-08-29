@@ -18,13 +18,14 @@ limitations under the License.
 
 ==============================================================================*/
 
-import Set from 'core-js/actual/set'
-import * as pmtiles from 'pmtiles'
-import maplibregl from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
-
 import * as turf from '@turf/helpers'
 import * as turfLength from "@turf/length"
+// biome-ignore lint/suspicious/noShadowRestrictedNames: a fast Set
+import Set from 'core-js/actual/set'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import * as pmtiles from 'pmtiles'
+
 
 //==============================================================================
 
@@ -63,22 +64,23 @@ import type {
     FlatMapOptions,
     FlatMapPathways,
     FlatMapPopUpOptions,
-    FlatMapState
+    FlatMapState,
+    FlatMapStyleSpecification,
+    GeoJSONId,
+    MinimapOptions,
+    Point2D,
+    Size2D
 } from './flatmap-types'
-import type {GeoJSONId, Point2D, Size2D} from './flatmap-types'
-import type {MinimapOptions} from './flatmap-types'
-import {FLATMAP_LEGEND} from './legend'
-import type {FlatmapLegendEntry} from './legend'
+import * as images from './images'
 import {UserInteractions} from './interactions'
 import {MapTermGraph} from './knowledge'
-import {KNOWLEDGE_SOURCE_SCHEMA, type FlatMapServer, SERVER_FLATMAP_RESOURCE} from './mapserver'
+import * as $rdf from './knowledge/rdf'
+import * as style from './layers/styling'
+import {FLATMAP_LEGEND, type FlatmapLegendEntry} from './legend'
+import {type FlatMapServer, KNOWLEDGE_SOURCE_SCHEMA, SERVER_FLATMAP_RESOURCE} from './mapserver'
 import {loadMarkerIcons} from './markers'
 import {APINATOMY_PATH_PREFIX, type PathType} from './pathways'
 import {SearchIndex} from './search'
-
-import * as images from './images'
-import * as $rdf from './knowledge/rdf'
-import * as style from './layers/styling'
 import * as utils from './utils'
 
 //==============================================================================
@@ -152,9 +154,9 @@ const ENCODED_FEATURE_PROPERTIES = [
 
 export class FLATMAP_STYLE
 {
-    static FUNCTIONAL = 'functional'
     static ANATOMICAL = 'anatomical'
     static CENTRELINE = 'centreline'
+    static FUNCTIONAL = 'functional'
     static GENERIC = 'flatmap'
 }
 
@@ -171,17 +173,6 @@ export interface CentrelineDetails
 export interface EntityLabel {
     entity: string
     label: string
-}
-
-//==============================================================================
-
-export type FlatMapSourceSpecification = maplibregl.VectorSourceSpecification
-                                       | maplibregl.RasterSourceSpecification
-
-export type FlatMapStyleSpecification = maplibregl.StyleSpecification & {
-    "sources": {
-        [_: string]: FlatMapSourceSpecification
-    }
 }
 
 //==============================================================================

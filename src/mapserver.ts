@@ -19,15 +19,13 @@ limitations under the License.
 ==============================================================================*/
 
 import type {
-    FlatMapStyleSpecification
-} from './flatmap'
-import type {
     FlatMapAnnotations,
     FlatMapIndex,
     FlatMapLayer,
     FlatMapMetadata,
     FlatMapPathways,
-    FlatMapServerIndex
+    FlatMapServerIndex,
+    FlatMapStyleSpecification
 } from './flatmap-types'
 
 import type {NodeLinkGraph} from './knowledge/graphs'

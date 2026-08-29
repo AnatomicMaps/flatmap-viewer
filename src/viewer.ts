@@ -21,12 +21,12 @@ limitations under the License.
 import {
     FLATMAP_STYLE,
     FlatMap,
-    type FlatMapStyleSpecification,
-    type MapDescriptionOptions,
+    type MapDescriptionOptions
 } from './flatmap'
 import type {
     FlatMapCallback, FlatMapIndex, FlatMapLayer,
-    FlatMapMetadata, FlatMapOptions, FlatMapServerIndex
+    FlatMapMetadata, FlatMapOptions, FlatMapServerIndex,
+    FlatMapStyleSpecification
 } from './flatmap-types'
 import * as $rdf from './knowledge/rdf'
 import {FlatMapServer} from './mapserver'

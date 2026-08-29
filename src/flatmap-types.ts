@@ -18,7 +18,7 @@ limitations under the License.
 
 ==============================================================================*/
 
-import maplibregl from 'maplibre-gl'
+import type maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
@@ -88,6 +88,17 @@ export interface FlatMapServerIndex
     sckan?: object
     taxon?: string
     uuid?: string
+}
+
+//==============================================================================
+
+export type FlatMapSourceSpecification = maplibregl.VectorSourceSpecification
+                                       | maplibregl.RasterSourceSpecification
+
+export type FlatMapStyleSpecification = maplibregl.StyleSpecification & {
+    "sources": {
+        [_: string]: FlatMapSourceSpecification
+    }
 }
 
 //==============================================================================
