@@ -259,6 +259,7 @@ export interface FlatMapOptions
     debug?: boolean
     flightPaths?: boolean
     fullscreenControl?: boolean
+    indexExtensions?: string[]
     layerOptions?: FlatMapLayerOptions
     minimap?: boolean | {
         position?: string

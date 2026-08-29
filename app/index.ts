@@ -24,7 +24,7 @@ import {PaneManager} from './multipane'
 
 //import { DATASETS } from './datasets'
 
-import { type FlatMap, type FlatMapOptions, MapViewer } from '../lib'
+import { type FlatMap, type FlatMapOptions, type MapListEntry, MapViewer } from '../lib'
 
 //==============================================================================
 
@@ -161,8 +161,9 @@ class StandaloneViewer
     #mapOptions: FlatMapOptions
     #mapProvenance: HTMLElement
 
-    #mapIdToName = new Map()
-    #mapGenerations = new Map()
+    #mapIdToMap: Map<string, MapListEntry> = new Map()
+    #mapIdToName: Map<string, string> = new Map()
+    #mapGenerations: Map<string, MapListEntry[]> = new Map()
 
     #mapId: string|null = null
     #mapSex: string|null = null
@@ -286,10 +287,11 @@ class StandaloneViewer
     async setMapList(viewer: MapViewer)
     //=================================
     {
+        this.#mapIdToMap.clear()
         this.#mapIdToName.clear()
         this.#mapGenerations.clear()
-        const latestMaps = new Map()
-        const maps = await viewer.allMaps()
+        const latestMaps: Map<string, MapListEntry> = new Map()
+        const maps: Record<string, MapListEntry> = await viewer.allMaps()
         for (const map of Object.values(maps)) {
             const text: string[] = []
             if (map.describes) {
@@ -303,6 +305,7 @@ class StandaloneViewer
                 latestMaps.set(mapName, map)
             }
             const id = ('uuid' in map) ? map.uuid : map.id
+            this.#mapIdToMap.set(id, map)
             this.#mapIdToName.set(id, mapName)
             if (!this.#mapGenerations.has(mapName)) {
                 this.#mapGenerations.set(mapName, [map])
@@ -412,7 +415,11 @@ document.getElementById('map-load').textContent = '--'
 document.getElementById('map-ready').textContent = '--'
 document.getElementById('map-tiles').textContent = '--'
         console.log('Starting map load...')
-        await this.#paneManager.loadMap(viewer, id, this.mapCallback.bind(this), this.#mapOptions)
+
+        const options = Object.assign({}, this.#mapOptions, {
+            indexExtensions: this.#mapIdToMap.get(id)?.indexExtensions
+        })
+        await this.#paneManager.loadMap(viewer, id, this.mapCallback.bind(this), options)
         .then(map => {
             if (map) {
                 const loadTime = performance.now() - loadStartTime
