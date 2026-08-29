@@ -55,7 +55,6 @@ export type MapIdentifier = {
 export type MapListEntry = FlatMapServerIndex & {
     describes?: string
     id?: string
-    indexExtensions?: string[]
     'map-kinds'?: string[]
     separateLayers?: boolean
 }
@@ -250,7 +249,15 @@ export class MapViewer
         // Load the maps index file
 
         const mapId = map.uuid || map.id
-        const mapIndex: FlatMapIndex|null = (await this.#mapServer.mapIndex(mapId, options?.indexExtensions))
+        const mapIndex: FlatMapIndex|null = (
+            await this.#mapServer.mapIndex(mapId, [
+                'mapAnnotations',
+                'mapLayers',
+                'mapMetadata',
+                'mapPathways',
+                'mapStyle'
+            ])
+        )
 
         const mapIndexId = ('uuid' in mapIndex) ? mapIndex.uuid : mapIndex.id
         if (mapId !== mapIndexId) {
