@@ -416,7 +416,7 @@ document.getElementById('map-load').textContent = '--'
 document.getElementById('map-ready').textContent = '--'
 document.getElementById('map-tiles').textContent = '--'
 document.getElementById('loading').hidden = false
-        console.log('Starting map load...')
+        console.log('Starting map load:', viewer.mapServerUrl, id)
 
         const options = Object.assign({}, this.#mapOptions, {
             indexExtensions: this.#mapIdToMap.get(id)?.indexExtensions
