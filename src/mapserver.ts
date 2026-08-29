@@ -155,9 +155,12 @@ export class FlatMapServer
         return this.#loadImageBytes(`flatmap/${mapId}/images/${image}`)
     }
 
-    async mapIndex(mapId: string): Promise<FlatMapIndex|null>
-    //=======================================================
+    async mapIndex(mapId: string, extras: string[]=[]): Promise<FlatMapIndex|null>
+    //============================================================================
     {
+        if (extras.length) {
+            return this.#loadJSON<FlatMapIndex>(`flatmap/${mapId}/?extras=${extras.join(';')}`)
+        }
         return this.#loadJSON<FlatMapIndex>(`flatmap/${mapId}/`)
     }
 

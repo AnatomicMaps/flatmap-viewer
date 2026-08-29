@@ -132,7 +132,12 @@ export interface FlatMapIndex
     style: string
     taxon?: string
     uuid?: string
-    version: number
+    version: number,
+    mapAnnotations?: FlatMapAnnotations
+    mapLayers?: FlatMapLayer[]
+    mapMetadata?: FlatMapMetadata
+    mapPathways?: FlatMapPathways
+    mapStyle?: FlatMapStyleSpecification
 }
 
 //==============================================================================

@@ -249,7 +249,16 @@ export class MapViewer
         // Load the maps index file
 
         const mapId = map.uuid || map.id
-        const mapIndex: FlatMapIndex|null = (await this.#mapServer.mapIndex(mapId))!
+        const mapIndex: FlatMapIndex|null = (
+            await this.#mapServer.mapIndex(mapId, [
+                'mapAnnotations',
+                'mapLayers',
+                'mapMetadata',
+                'mapPathways',
+                'mapStyle'
+            ])
+        )
+
         const mapIndexId = ('uuid' in mapIndex) ? mapIndex.uuid : mapIndex.id
         if (mapId !== mapIndexId) {
             throw new Error(`Map '${mapId}' has wrong ID in index`)
@@ -301,12 +310,14 @@ export class MapViewer
                 }
             }
         } else {
-            mapLayers = (await this.#mapServer.mapLayers(mapId))
+            mapLayers = mapIndex?.mapLayers
+                     || (await this.#mapServer.mapLayers(mapId))
         }
 
         // Get the map's style file
 
-        const mapStyle: FlatMapStyleSpecification|null = (await this.#mapServer.mapStyle(mapId))
+        const mapStyle: FlatMapStyleSpecification|null = mapIndex?.mapStyle
+                                                      || (await this.#mapServer.mapStyle(mapId))
 
         // Make sure the style has glyphs defined
 
@@ -316,16 +327,18 @@ export class MapViewer
 
         // Get the map's pathways
         const pathways = !options.pathsDisabled
-                       ? (await this.#mapServer.mapPathways(mapId))
+                       ? mapIndex?.mapPathways || (await this.#mapServer.mapPathways(mapId))
                        : noFlatMapPathways
 
         // Get the map's annotations
 
-        const annotations = (await this.#mapServer.mapAnnotations(mapId))
+        const annotations = mapIndex?.mapAnnotations
+                         || (await this.#mapServer.mapAnnotations(mapId))
 
         // Get metadata about the map
 
-        const mapMetadata: FlatMapMetadata|null = (await this.#mapServer.mapMetadata(mapId))
+        const mapMetadata: FlatMapMetadata|null = mapIndex?.mapMetadata
+                                               || (await this.#mapServer.mapMetadata(mapId))
 
         // Get any RDF knowledge for the map
 
