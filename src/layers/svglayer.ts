@@ -18,7 +18,7 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Map as MapLibreMap} from 'maplibre-gl'
+import type {Map as MapLibreMap} from 'maplibre-gl'
 
 //import {BitmapLayer, BitmapLayerProps} from '@deck.gl/layers';
 //import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
@@ -27,9 +27,9 @@ import {Matrix4} from '@math.gl/core';
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
+import type {FlatMap} from '../flatmap'
 
-import {DeckGlOverlay} from './deckgl'
+import type {DeckGlOverlay} from './deckgl'
 
 //==============================================================================
 

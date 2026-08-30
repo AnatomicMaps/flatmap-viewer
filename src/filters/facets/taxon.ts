@@ -19,7 +19,7 @@ limitations under the License.
 ==============================================================================*/
 
 import {UNCLASSIFIED_TAXON_ID} from '../../flatmap'
-import {PropertiesFilter, PropertiesFilterExpression} from '..'
+import {PropertiesFilter, type PropertiesFilterExpression} from '..'
 import {Facet, FilteredFacet} from '.'
 
 //==============================================================================

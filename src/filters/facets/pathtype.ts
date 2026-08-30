@@ -18,8 +18,8 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {PathType, PATHWAYS_LAYER} from '../../pathways'
-import {PropertiesFilter, PropertiesFilterExpression} from '..'
+import {type PathType, PATHWAYS_LAYER} from '../../pathways'
+import {PropertiesFilter, type PropertiesFilterExpression} from '..'
 import {Facet, FilteredFacet} from '.'
 
 //==============================================================================

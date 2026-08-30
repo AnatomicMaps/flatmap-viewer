@@ -45,11 +45,11 @@ limitations under the License.
 
 //==============================================================================
 
-import maplibregl from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
+import type { FlatMap } from '../flatmap'
 import type { MinimapOptions } from '../flatmap-types'
 
 //==============================================================================

@@ -41,15 +41,14 @@ limitations under the License.
 
 //==============================================================================
 
-import maplibregl from 'maplibre-gl'
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
+import type * as maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
+import type { FlatMap } from '../flatmap'
 import type {AnnotatedFeature, AnnotationDrawMode, AnnotationEvent, GeoJSONId} from '../flatmap-types'
-
-import {FlatMap} from '../flatmap'
 
 //==============================================================================
 

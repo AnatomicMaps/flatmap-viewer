@@ -18,8 +18,8 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {NerveCentrelineDetails} from '../../pathways'
-import {PropertiesFilter, PropertiesFilterExpression} from '..'
+import type {NerveCentrelineDetails} from '../../pathways'
+import {PropertiesFilter, type PropertiesFilterExpression} from '..'
 import {Facet, FilteredFacet} from '.'
 
 //==============================================================================

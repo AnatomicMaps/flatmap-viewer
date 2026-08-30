@@ -18,13 +18,13 @@ limitations under the License.
 
 ==============================================================================*/
 
-import maplibregl from 'maplibre-gl'
+import type * as maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
-import {UserInteractions} from '../interactions'
-import {NerveCentrelineDetails} from '../pathways'
+import type { FlatMap } from '../flatmap'
+import type { UserInteractions } from '../interactions'
+import type { NerveCentrelineDetails } from '../pathways'
 
 //==============================================================================
 

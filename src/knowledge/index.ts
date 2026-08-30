@@ -18,7 +18,7 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {DiGraph, NodeLinkGraph} from './graphs'
+import {DiGraph, type NodeLinkGraph} from './graphs'
 
 //==============================================================================
 

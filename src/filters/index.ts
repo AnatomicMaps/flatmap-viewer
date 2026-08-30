@@ -22,7 +22,7 @@ import Set from 'core-js/actual/set'
 
 //==============================================================================
 
-import {PropertiesType, PropertyKey, PropertyValue, ScalarType} from '../types'
+import type {PropertiesType, PropertyKey, PropertyValue, ScalarType} from '../types'
 
 //==============================================================================
 

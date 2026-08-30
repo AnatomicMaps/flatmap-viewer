@@ -18,12 +18,12 @@ limitations under the License.
 
 ==============================================================================*/
 
-import maplibregl from 'maplibre-gl'
+import type * as maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
-import {FlatMap} from '../flatmap'
-import type {PathType} from '../pathways'
+import type { FlatMap } from '../flatmap'
+import type { PathType } from '../pathways'
 
 //==============================================================================
 

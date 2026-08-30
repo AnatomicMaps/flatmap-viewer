@@ -18,11 +18,11 @@ limitations under the License.
 
 ==============================================================================*/
 
-import MiniSearch, {Suggestion} from 'minisearch'
+import MiniSearch, {type Suggestion} from 'minisearch'
 
 //==============================================================================
 
-import {FlatMapFeatureAnnotation} from './flatmap-types'
+import type {FlatMapFeatureAnnotation} from './flatmap-types'
 import type {GeoJSONId} from './flatmap-types'
 
 //==============================================================================

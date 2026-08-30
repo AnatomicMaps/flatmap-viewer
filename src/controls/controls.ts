@@ -18,13 +18,13 @@ limitations under the License.
 
 ==============================================================================*/
 
-import maplibregl from 'maplibre-gl'
+import type * as maplibregl from 'maplibre-gl'
 
 //==============================================================================
 
-import type {FlatMapLayer, FlatMapLayerOptions} from '../flatmap-types'
-import {FlatMap} from '../flatmap'
-import {LayerManager} from '../layers'
+import type { FlatMap } from '../flatmap'
+import type { FlatMapLayer, FlatMapLayerOptions } from '../flatmap-types'
+import type { LayerManager } from '../layers'
 
 //==============================================================================
 // Make sure colour string is in `#rrggbb` form.

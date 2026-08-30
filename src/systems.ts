@@ -18,9 +18,9 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {FlatMap} from './flatmap'
+import type {FlatMap} from './flatmap'
 import type {GeoJSONId} from './flatmap-types'
-import {UserInteractions} from './interactions'
+import type {UserInteractions} from './interactions'
 
 //==============================================================================
 

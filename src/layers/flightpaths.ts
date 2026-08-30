@@ -18,24 +18,25 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {Position} from '@deck.gl/core'
-import {ArcLayer, ArcLayerProps} from '@deck.gl/layers'
-import {Model, Geometry} from '@luma.gl/engine'
+import type { Position } from '@deck.gl/core'
+import { ArcLayer, type ArcLayerProps } from '@deck.gl/layers'
+
+import { Geometry, Model } from '@luma.gl/engine'
 
 //==============================================================================
 
-import {PropertiesFilter} from '../filters'
-import type {GeoJSONId, MapFeatureIdentifier} from '../flatmap-types'
-import {FlatMap} from '../flatmap'
-import {pathColourArray, PathStyle} from '../pathways'
-import {UserInteractions} from '../interactions'
+import { PropertiesFilter } from '../filters'
+import type { FlatMap } from '../flatmap'
+import type { GeoJSONId, MapFeatureIdentifier } from '../flatmap-types'
+import type { UserInteractions } from '../interactions'
+import { type PathStyle, pathColourArray }  from '../pathways'
 
-import {DeckGlOverlay} from './deckgl'
-import {StylingOptions} from './styling'
+import type { DeckGlOverlay } from './deckgl'
+import type { StylingOptions } from './styling'
 
 //==============================================================================
 
-import {PropertiesType} from '../types'
+import type { PropertiesType } from '../types'
 
 interface PathProperties extends PropertiesType {
     active?: boolean

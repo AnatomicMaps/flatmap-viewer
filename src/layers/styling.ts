@@ -24,7 +24,6 @@ import type {
     DataDrivenPropertyValueSpecification,
     ExpressionFilterSpecification,
     ExpressionSpecification,
-    ExpressionType,
     FillLayerSpecification,
     LineLayerSpecification,
     PropertyValueSpecification,
@@ -84,7 +83,7 @@ const NERVE_SELECTED = 'black'
 
 //==============================================================================
 
-export function markerZoomScaling(expression: ExpressionSpecification|ExpressionType|number): DataDrivenPropertyValueSpecification<number> {
+export function markerZoomScaling(expression: ExpressionSpecification|number): DataDrivenPropertyValueSpecification<number> {
     return [
         'let', 'unscaled', expression,
         [
@@ -97,7 +96,7 @@ export function markerZoomScaling(expression: ExpressionSpecification|Expression
     ]
 }
 
-export function uniformZoomScaling(expression: ExpressionSpecification|ExpressionType|number): DataDrivenPropertyValueSpecification<number> {
+export function uniformZoomScaling(expression: ExpressionSpecification|number): DataDrivenPropertyValueSpecification<number> {
     return [
         'let', 'unscaled', expression,
         [
