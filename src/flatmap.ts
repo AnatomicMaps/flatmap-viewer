@@ -2341,7 +2341,7 @@ export class FlatMap
                     // In entity, source[desc] order; we use the most recent label
                     if (row[1] !== last_entity) {
                         const knowledge = JSON.parse(row[2])
-                        const label = knowledge['label'] || row[1]
+                        const label = knowledge.label || row[1]
                         entityLabels.push({
                             entity: row[1],
                             label: label

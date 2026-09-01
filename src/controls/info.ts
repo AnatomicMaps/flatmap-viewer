@@ -54,10 +54,6 @@ export class InfoDisplay
 {
     #container: HTMLDivElement|null = null
 
-    constructor()
-    {
-    }
-
     getDefaultPosition(): maplibregl.ControlPosition
     //==============================================
     {
@@ -169,7 +165,7 @@ export class InfoControl
         // Get all features if the control is active otherwise just the selected ones
 
         const featureList = (this.#active || this.#flatmap.options.debug) ? features
-                            : features.filter(feature => this.#map.getFeatureState(feature)['selected'])
+                            : features.filter(feature => this.#map.getFeatureState(feature).selected)
 
         if (featureList.length === 0) {
             return ''
