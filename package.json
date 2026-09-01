@@ -18,9 +18,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "bun tsc --p ./tsconfig-build.json && bun vite build",
-    "preview": "vite preview",
     "start": "bun oxigraph:check && vite serve app --port 3000",
+    "preview": "vite preview app --port 3000  ",
     "build": "bun oxigraph:check && vite build app --base /",
     "build:lib": "bun oxigraph:check && vite build --config vite.config.ts",
     "build-docs": "bunx typedoc",
