@@ -31,13 +31,17 @@ jobs:
       - name: Update npm
         # Install the latest version of npm since we need npm 11.5.1 or later to publish to npm using OIDC (see
         # https://docs.npmjs.com/trusted-publishers).
-        run: npm install -g npm@latest
+        run: |
+          npm install -g npm@latest
 
       - name: Install bun
         uses: oven-sh/setup-bun@v2
 
       - name: Build the Flatmap Viewer
-        run: bun install
+        run: |
+          bun install
+          bun run build:lib
 
       - name: Publish the Flatmap Viewer on npm
-        run: npm publish --access public
+        run: |
+          npm publish --access public
