@@ -1,36 +1,33 @@
-import path from 'node:path'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 import { libInjectCss } from 'vite-plugin-lib-inject-css'
 
 export default defineConfig({
   plugins: [
-    dts({ include: ['lib'] }),
+    dts({
+      include: ['lib'],
+      insertTypesEntry: true
+    }),
     libInjectCss()
   ],
   build: {
     copyPublicDir: false,
     cssCodeSplit: true,
     lib: {
+      entry: './lib/index.ts',
       formats: ['es'],
-      entry: path.resolve(__dirname, 'lib/index.ts'),
       name: 'FlatmapViewer'
     },
+    sourcemap: true,
     target: 'esnext',
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        // Put chunk files at <output>/chunks
-        chunkFileNames: 'chunks/[name].[hash].js',
-        // Put chunk styles at <output>/assets
-        assetFileNames: 'assets/[name][extname]',
-        entryFileNames: '[name].js',
+        dir: 'dist',
+        exports: 'named'
       }
     }
   },
   optimizeDeps: {
-      esbuildOptions: {
-          target: 'esnext'
-      },
       exclude: [
           '*.wasm'
       ]
