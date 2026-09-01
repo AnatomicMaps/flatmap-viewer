@@ -1,0 +1,60 @@
+{
+    "assist": {
+        "actions": {
+            "source": {
+                "organizeImports": "off"
+            }
+        }
+    },
+    "formatter": {
+        "includes": ["**/*.js", "**/*.json", "**/*.ts", "!src/assets/**"],
+        "indentWidth": 4,
+        "indentStyle": "space",
+        "lineWidth": 120
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "semicolons": "asNeeded",
+            "trailingCommas": "none"
+        }
+    },
+    "linter": {
+        "includes": [
+            "**/*.js",
+            "**/*.ts",
+            "!app/**",
+            "!docs/assets/**",
+            "!src/assets/**",
+            "!dist/**",
+            "!thirdParty/maplibre-gl-svg/build",
+            "!thirdParty/maplibre-gl-svg/dist",
+            "!WIP/**"
+        ]
+    },
+    "overrides": [
+        {
+            "linter": {
+                "rules": {
+                    "complexity": {
+                        "noImportantStyles": "off"
+                    }
+                }
+            }
+        },
+        {
+            "linter": {
+                "rules": {
+                    "style": {
+                        "useConst": "off",
+                        "useImportType": "off"
+                    },
+                    "correctness": {
+                        "noUnusedImports": "off",
+                        "noUnusedVariables": "off"
+                    }
+                }
+            }
+        }
+    ]
+}
