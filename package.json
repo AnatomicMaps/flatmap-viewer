@@ -31,7 +31,7 @@
     "preview-docs": "live-server docs",
     "oxigraph:check": "bun ./scripts/check-oxigraph.ts",
     "typecheck": "tsc --noEmit -p tsconfig-build.json --composite false",
-    "tsdoc": "typedoc",
+    "tsdoc": "typedoc"
   },
   "author": "David Brooks",
   "license": "Apache-2.0",
