@@ -56,6 +56,7 @@
     "graphology-shortest-path": "^2.1.0",
     "html-es6cape": "^2.0.2",
     "maplibre-gl": "^5.5.0",
+    "maplibre-gl-svg": "./thirdParty/maplibre-gl-svg",
     "mathjax-full": "^3.2.2",
     "minisearch": "^2.2.1",
     "oxigraph": "^0.5.6",
@@ -81,8 +82,5 @@
     "vite": "^5.1.4",
     "vite-plugin-dts": "^4.5.0",
     "vite-plugin-lib-inject-css": "^2.0.1"
-  },
-  "workspaces": [
-    "thirdParty/maplibre-gl-svg"
-  ]
+  }
 }

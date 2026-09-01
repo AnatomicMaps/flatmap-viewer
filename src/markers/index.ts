@@ -20,7 +20,7 @@ limitations under the License.
 
 import type {Map as MapLibreMap} from 'maplibre-gl'
 
-import {SvgManager, SvgTemplateManager} from '../../thirdParty/maplibre-gl-svg/src'
+import {SvgManager, SvgTemplateManager} from 'maplibre-gl-svg/src'
 
 //==============================================================================
 
