@@ -18,9 +18,9 @@ limitations under the License.
 
 ==============================================================================*/
 
-import {FlatMapCallback, FlatMapOptions} from '../flatmap-types'
+import type {FlatMapCallback, FlatMapOptions} from '../flatmap-types'
 import {FlatMapServer} from '../mapserver'
-import {MapIdentifier} from '../viewer'
+import type {MapIdentifier} from '../viewer'
 
 import {PanZoom} from './panzoom'
 

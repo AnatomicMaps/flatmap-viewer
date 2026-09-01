@@ -18,7 +18,7 @@ limitations under the License.
 
 ******************************************************************************/
 
-import {Point, PointLike} from './points'
+import {Point, type PointLike} from './points'
 
 //==============================================================================
 
