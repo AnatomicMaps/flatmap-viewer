@@ -57,7 +57,7 @@
     "graphology-operators": "^1.6.0",
     "graphology-shortest-path": "^2.1.0",
     "html-es6cape": "^2.0.2",
-    "maplibre-gl": "^5.5.0",
+    "maplibre-gl": "^5.24.0",
     "maplibre-gl-svg": "./thirdParty/maplibre-gl-svg",
     "mathjax-full": "^3.2.2",
     "minisearch": "^2.2.1",
