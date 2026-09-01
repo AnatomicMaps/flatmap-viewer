@@ -99,7 +99,7 @@ class ArcDashedLayer extends ArcMapLayer
         const model = new Model(this.context.device, {
             ...this.getShaders(),
             id: this.props.id,
-            bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+            bufferLayout: this.getAttributeManager().getBufferLayouts(),
             geometry: new Geometry({
                 topology: 'triangle-list',
                 attributes: {
@@ -133,13 +133,13 @@ export class FlightPathLayer
         this.#deckOverlay = deckOverlay
         this.#pathFeatures = new Map([...flatmap.annotations.values()]
                                     .filter(ann => ann['tile-layer'] === 'pathways'
-                                                && ('geometry' in ann && ann['geometry'] === 'LineString'
+                                                && ('geometry' in ann && ann.geometry === 'LineString'
                                                  || 'geom-type' in ann && ann['geom-type'] === 'LineString')
-                                                && 'type' in ann && ann['type']!.startsWith('line')
+                                                && 'type' in ann && ann.type.startsWith('line')
                                                 && 'kind' in ann
                                                 && 'pathStartPosition' in ann
                                                 && 'pathEndPosition' in ann)
-                                    .map(ann => [ann.featureId, ann as PathProperties]))
+                                    .map(ann => [ann.featureId, ann as unknown as PathProperties]))
         this.#pathStyles = new Map(ui.pathManager.pathStyles().map(pathStyle => [pathStyle.type, pathStyle]))
         this.#pathTypes = [...this.#pathStyles.keys()]
         const knownTypes = this.#pathTypes.filter(pathType => pathType !== 'other')
@@ -190,7 +190,7 @@ export class FlightPathLayer
         if (this.#enabled) {
             return this.#deckOverlay
                        .queryFeaturesAtPoint(point)
-                       .filter(o => o.layer!.id.startsWith(ARC_ID_PREFIX))
+                       .filter(o => o.layer.id.startsWith(ARC_ID_PREFIX))
                        .map(o => this.#makeMapFeature(o.object))
         }
         return []

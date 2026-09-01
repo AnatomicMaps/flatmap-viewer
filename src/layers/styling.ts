@@ -744,11 +744,11 @@ export class PathLineLayer extends VectorStyleLayer
         const exclude = 'excludeAnnotated' in options && options.excludeAnnotated
         const pathLowDensityMode = options.pathLowDensityMode || false
         const paintStyle: PaintSpecification = {
+            // @ts-expect-error
             'line-color': [
                 'let', 'active', ['to-number', ['feature-state', 'active'], 0],
                 [ 'case',
                     ['==', ['get', 'type'], 'bezier'], 'red',
-                    // @ts-expect-error 2322
                     ...PATH_STYLE_RULES, '#888'
                 ]
             ],
@@ -1131,6 +1131,7 @@ export class NervePolygonFill extends VectorStyleLayer
     {
         const dimmed = options.dimmed || false
         const paintStyle: PaintSpecification = {
+            // @ts-expect-error
             'fill-color': [
                 'case',
                 ['boolean', ['feature-state', 'selected'], false], COLOUR_SELECTED,
@@ -1141,7 +1142,6 @@ export class NervePolygonFill extends VectorStyleLayer
                 ['has', 'colour'], ['get', 'colour'],
                 ['==', ['get', 'kind'], 'bezier-end'], 'red',
                 ['==', ['get', 'kind'], 'bezier-control'], 'green',
-                // @ts-expect-error 2322
                 ...PATH_STYLE_RULES, '#00A0FF'
             ],
             'fill-opacity': [

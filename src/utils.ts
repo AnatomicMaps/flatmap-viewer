@@ -64,7 +64,7 @@ export class List<T> extends Array<T> {
     slice(start: number, end: number): List<T>
     //========================================
     {
-        return new List(Array(...this).slice(start, end))
+        return new List([...this].slice(start, end))
     }
 }
 

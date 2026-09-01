@@ -831,7 +831,7 @@ export class UserInteractions
         if (feature) {
             const activeMap = this.#collectingActiveFeatures ? this.#nextActiveFeatures
                                                              : this.#activeFeatures
-            if (activeMap && activeMap.has(+feature.id)) {
+            if (activeMap?.has(+feature.id)) {
                 return
             }
             if (this.#collectingActiveFeatures) {
@@ -1105,7 +1105,7 @@ export class UserInteractions
     {
         if (this.#currentPopup) {
             this.#clearModal()
-            if (!(this.#currentPopup.options && this.#currentPopup.options['preserveSelection'])) {
+            if (!this.#currentPopup?.options['preserveSelection']) {
                 this.unselectFeatures()
             }
             this.#currentPopup = null
@@ -1287,8 +1287,8 @@ export class UserInteractions
         }
 
         return ranges.some(([minzoom, maxzoom]) =>
-            (minzoom == null || zoom >= minzoom)
-         && (maxzoom == null || zoom <= maxzoom)
+            (minzoom === null || zoom >= minzoom)
+         && (maxzoom === null || zoom <= maxzoom)
         )
     }
 
@@ -2173,14 +2173,12 @@ export class UserInteractions
         const mapImageId = `image-${this.#lastImageId}`
         for (const featureId of featureIds) {
             const annotation = this.#flatmap.annotation(featureId)
-            if (!(annotation
-               && annotation.geometry
-               && annotation.geometry.includes('Polygon'))) {
+            if (!annotation?.geometry.includes('Polygon')) {
                 continue
             }
             this.#lastImageId += 1
             const imageId = `${mapImageId}-${this.#lastImageId}`
-            const featureBounds = annotation.bounds!
+            const featureBounds = annotation.bounds
             this.#map.addSource(`${imageId}-source`, {
                 type: 'image',
                 url: imageUrl,

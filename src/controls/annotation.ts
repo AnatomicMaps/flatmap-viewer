@@ -106,7 +106,7 @@ export class AnnotationDrawControl
         this.#draw.options.controls.trash = true
 
         // Prevent firefox menu from appearing on Alt key up
-        window.addEventListener('keyup', function (e) {
+        window.addEventListener('keyup', (e) => {
             if (e.key === "Alt") {
                 e.preventDefault()
             }

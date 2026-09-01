@@ -65,7 +65,7 @@ export class PathControl
         this.#checkedCount = 0
         for (const path of this.#pathTypes) {
             const checked =  !('enabled' in path) || path.enabled ? 'checked' : ''
-            if (checked != '') {
+            if (checked !== '') {
                 this.#checkedCount += 1
             }
             const colour = path.colour || '#440'

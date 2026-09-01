@@ -77,7 +77,7 @@ class InternalState
     enable(enable: boolean=true): boolean
     //===================================
     {
-        if (this.#enabled != enable) {
+        if (this.#enabled !== enable) {
             this.#enabled = enable
             return true
         }
@@ -156,7 +156,9 @@ export class FilteredFacet
     enable(idList: string[], enable: boolean=true)
     //============================================
     {
-        idList.forEach(id => this.#facet.enable(id, enable))
+        idList.forEach(id => {
+            this.#facet.enable(id, enable)
+        })
     }
 
     makeFilter(): PropertiesFilter

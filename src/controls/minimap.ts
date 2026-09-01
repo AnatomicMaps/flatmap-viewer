@@ -336,7 +336,7 @@ export class MinimapControl
     //=========================================
     {
         const source = this.#trackingRect
-        const data = source._data as GeoJSON.Feature
+        const data = source._data as unknown as GeoJSON.Feature
         const bounds = data.properties.bounds
 
         bounds._ne.lat -= offset[1]
@@ -354,7 +354,7 @@ export class MinimapControl
     //=====================================================
     {
         const source = this.#trackingRect
-        const data = source._data as GeoJSON.Feature
+        const data = source._data as unknown as GeoJSON.Feature
 
         data.properties.bounds = bounds
         this.#convertBoundsToPoints(bounds)
@@ -402,7 +402,7 @@ export class MinimapControl
         const parentZoom = parentMap.getZoom()
         let found = false
 
-        ZOOMLEVELS.forEach(function(zoom) {
+        ZOOMLEVELS.forEach((zoom) => {
             if (!found && parentZoom >= zoom[0]) {
                 if (miniZoom >= zoom[1]) {
                     miniMap.setZoom(zoom[2])

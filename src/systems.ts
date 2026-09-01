@@ -158,7 +158,7 @@ export class SystemsManager
                 this.#ui.enableMapFeature(feature, enable)
                 for (const childFeatureId of feature.children) {
                     const enabledCount = this.#enabledChildren.get(childFeatureId)
-                    if (enable && enabledCount === 0 || !enable && enabledCount == 1) {
+                    if (enable && enabledCount === 0 || !enable && enabledCount === 1) {
                         this.#ui.enableFeatureWithChildren(childFeatureId, enable)
                     }
                     this.#enabledChildren.set(childFeatureId, enabledCount + (enable ? 1 : -1))
@@ -177,7 +177,7 @@ export class SystemsManager
     //=============================
     {
         const system = this.#systems.get(systemId)
-        return (system && system.enabled)
+        return system?.enabled
     }
 }
 
