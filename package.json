@@ -23,6 +23,7 @@
     "start": "bun oxigraph:check && vite serve app --port 3000",
     "build": "bun oxigraph:check && vite build app --base /",
     "build-docs": "bunx typedoc",
+    "clean": "bun scripts/clean.js",
     "docs": "bunx typedoc --watch",
     "preview-docs": "live-server docs",
     "lint": "eslint ./src/",
