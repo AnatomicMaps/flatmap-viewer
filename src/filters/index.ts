@@ -18,10 +18,6 @@ limitations under the License.
 
 ==============================================================================*/
 
-import Set from 'core-js/actual/set'
-
-//==============================================================================
-
 import type {PropertiesType, PropertyKey, PropertyValue, ScalarType} from '../types'
 
 //==============================================================================

@@ -18,9 +18,6 @@ limitations under the License.
 
 ==============================================================================*/
 
-
-// biome-ignore lint/suspicious/noShadowRestrictedNames: use improved `set` code
-import  Set from 'core-js/actual/set'
 import * as maplibregl from 'maplibre-gl'
 
 import {default as turfAlong} from '@turf/along'

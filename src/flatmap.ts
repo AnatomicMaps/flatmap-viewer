@@ -20,8 +20,6 @@ limitations under the License.
 
 import * as turf from '@turf/helpers'
 import * as turfLength from "@turf/length"
-// biome-ignore lint/suspicious/noShadowRestrictedNames: a fast Set
-import Set from 'core-js/actual/set'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import * as pmtiles from 'pmtiles'
