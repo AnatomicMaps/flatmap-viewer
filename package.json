@@ -40,8 +40,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@deck.gl/core": "~9.1.8",
+    "@deck.gl/extensions": "~9.1.8",
     "@deck.gl/geo-layers": "~9.1.8",
     "@deck.gl/layers": "~9.1.8",
+    "@deck.gl/mesh-layers": "~9.1.8",
     "@deck.gl/mapbox": "~9.1.8",
     "@jeswr/pretty-turtle": "^1.8.2",
     "@luma.gl/engine": "~9.1.7",

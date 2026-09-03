@@ -6,9 +6,11 @@
       "name": "@abi-software/flatmap-viewer",
       "dependencies": {
         "@deck.gl/core": "~9.1.8",
+        "@deck.gl/extensions": "~9.1.8",
         "@deck.gl/geo-layers": "~9.1.8",
         "@deck.gl/layers": "~9.1.8",
         "@deck.gl/mapbox": "~9.1.8",
+        "@deck.gl/mesh-layers": "~9.1.8",
         "@jeswr/pretty-turtle": "^1.8.2",
         "@luma.gl/engine": "~9.1.7",
         "@mapbox/mapbox-gl-draw": "=1.4.3",
@@ -102,7 +104,7 @@
 
     "@deck.gl/core": ["@deck.gl/core@9.1.15", "", { "dependencies": { "@loaders.gl/core": "^4.2.0", "@loaders.gl/images": "^4.2.0", "@luma.gl/constants": "~9.1.9", "@luma.gl/core": "~9.1.9", "@luma.gl/engine": "~9.1.9", "@luma.gl/shadertools": "~9.1.9", "@luma.gl/webgl": "~9.1.9", "@math.gl/core": "^4.1.0", "@math.gl/sun": "^4.1.0", "@math.gl/types": "^4.1.0", "@math.gl/web-mercator": "^4.1.0", "@probe.gl/env": "^4.1.0", "@probe.gl/log": "^4.1.0", "@probe.gl/stats": "^4.1.0", "@types/offscreencanvas": "^2019.6.4", "gl-matrix": "^3.0.0", "mjolnir.js": "^3.0.0" } }, "sha512-2Tx2aKNskDS8SZ6EB7V53exo3SVntCJJGjrAnz3KhNj4fA4BVqOH++LSpjCFhuG9m4WOWDSDq9s7w4DQnTiT+Q=="],
 
-    "@deck.gl/extensions": ["@deck.gl/extensions@9.3.11", "", { "dependencies": { "@luma.gl/shadertools": "~9.3.5", "@luma.gl/webgl": "~9.3.5", "@math.gl/core": "^4.1.0" }, "peerDependencies": { "@deck.gl/core": "~9.3.0", "@luma.gl/core": "~9.3.5", "@luma.gl/engine": "~9.3.5" } }, "sha512-HOWSgGrNX3ViIg6Y2rvvgDCpGTUPyYezTuwbyKHt/r4ah+oGSu6P9d3aAsWIwEuu2Z1sjeDjAUCppd89OLm1TA=="],
+    "@deck.gl/extensions": ["@deck.gl/extensions@9.1.15", "", { "dependencies": { "@luma.gl/constants": "~9.1.9", "@luma.gl/shadertools": "~9.1.9", "@math.gl/core": "^4.1.0" }, "peerDependencies": { "@deck.gl/core": "^9.1.0", "@luma.gl/core": "~9.1.9", "@luma.gl/engine": "~9.1.9" } }, "sha512-pH3SArgiEibHwrYwbKTknUurgpUndUFa+O97in+zRVF6KFGNZSLm1AePERh1gQjcpuQ+GwrxJ/ijmVmuH2zOow=="],
 
     "@deck.gl/geo-layers": ["@deck.gl/geo-layers@9.1.15", "", { "dependencies": { "@loaders.gl/3d-tiles": "^4.2.0", "@loaders.gl/gis": "^4.2.0", "@loaders.gl/loader-utils": "^4.2.0", "@loaders.gl/mvt": "^4.2.0", "@loaders.gl/schema": "^4.2.0", "@loaders.gl/terrain": "^4.2.0", "@loaders.gl/tiles": "^4.2.0", "@loaders.gl/wms": "^4.2.0", "@luma.gl/gltf": "~9.1.9", "@luma.gl/shadertools": "~9.1.9", "@math.gl/core": "^4.1.0", "@math.gl/culling": "^4.1.0", "@math.gl/web-mercator": "^4.1.0", "@types/geojson": "^7946.0.8", "h3-js": "^4.1.0", "long": "^3.2.0" }, "peerDependencies": { "@deck.gl/core": "^9.1.0", "@deck.gl/extensions": "^9.1.0", "@deck.gl/layers": "^9.1.0", "@deck.gl/mesh-layers": "^9.1.0", "@loaders.gl/core": "^4.2.0", "@luma.gl/core": "~9.1.9", "@luma.gl/engine": "~9.1.9" } }, "sha512-dehvciiUyCnklCfY5v0JgGAgJfbQ0Rn/ml55Maqdw5c5K6fIQzi4xMglu1NdgO3L+MOutWWA1eFD9WLT2X0mkA=="],
 
@@ -110,7 +112,7 @@
 
     "@deck.gl/mapbox": ["@deck.gl/mapbox@9.1.15", "", { "dependencies": { "@luma.gl/constants": "~9.1.9", "@math.gl/web-mercator": "^4.1.0" }, "peerDependencies": { "@deck.gl/core": "^9.1.0", "@luma.gl/core": "~9.1.9" } }, "sha512-XnQKlQUOYx27+m2WJqYMFeDv36yGkUPbbra5bb1j+jDLA11GRBweYM/rq9JtrdWpfcdtJTmLnpeeVPJV8Bm3/Q=="],
 
-    "@deck.gl/mesh-layers": ["@deck.gl/mesh-layers@9.3.11", "", { "dependencies": { "@loaders.gl/gltf": "^4.4.3", "@loaders.gl/schema": "^4.4.3", "@luma.gl/gltf": "~9.3.5", "@luma.gl/shadertools": "~9.3.5" }, "peerDependencies": { "@deck.gl/core": "~9.3.0", "@luma.gl/core": "~9.3.5", "@luma.gl/engine": "~9.3.5" } }, "sha512-lL7NLb7luBjo7RghSRsaa3bMNWp/APEtWBZWcrAaSTHTmvqlJlsAGUux92fDlva+6flzwsaeqSzGCruLu/Kziw=="],
+    "@deck.gl/mesh-layers": ["@deck.gl/mesh-layers@9.1.15", "", { "dependencies": { "@loaders.gl/gltf": "^4.2.0", "@luma.gl/gltf": "~9.1.9", "@luma.gl/shadertools": "~9.1.9" }, "peerDependencies": { "@deck.gl/core": "^9.1.0", "@luma.gl/core": "~9.1.9", "@luma.gl/engine": "~9.1.9" } }, "sha512-/GuXxa2Y5Bv/6DSOA6sgPalCZAPN137cTE5SDbOH88yKAY0ggn5FmgcimhGNRcR28tGy+yOCy/PbtIDoba6dpw=="],
 
     "@gerrit0/mini-shiki": ["@gerrit0/mini-shiki@3.23.0", "", { "dependencies": { "@shikijs/engine-oniguruma": "^3.23.0", "@shikijs/langs": "^3.23.0", "@shikijs/themes": "^3.23.0", "@shikijs/types": "^3.23.0", "@shikijs/vscode-textmate": "^10.0.2" } }, "sha512-bEMORlG0cqdjVyCEuU0cDQbORWX+kYCeo0kV1lbxF5bt4r7SID2l9bqsxJEM0zndaxpOUT7riCyIVEuqq/Ynxg=="],
 
@@ -1287,14 +1289,6 @@
     "yauzl": ["yauzl@2.10.0", "", { "dependencies": { "buffer-crc32": "~0.2.3", "fd-slicer": "~1.1.0" } }, "sha512-p4a9I6X6nu6IhoGmBqAcbJy1mlC4j27vEPZX9F4L4/vZT3Lyq1VkFHw/V/PUcB9Buo+DG3iHkT0x3Qya58zc3g=="],
 
     "zstd-codec": ["zstd-codec@0.1.5", "", {}, "sha512-v3fyjpK8S/dpY/X5WxqTK3IoCnp/ZOLxn144GZVlNUjtwAchzrVo03h+oMATFhCIiJ5KTr4V3vDQQYz4RU684g=="],
-
-    "@deck.gl/extensions/@luma.gl/shadertools": ["@luma.gl/shadertools@9.3.6", "", { "dependencies": { "@math.gl/core": "^4.1.0", "@math.gl/types": "^4.1.0" }, "peerDependencies": { "@luma.gl/core": "~9.3.0" } }, "sha512-dDuD8lCOkAE1L7hJGZEyZAi7upR1HG3wEEIQ1gCLaTTbJWC7tNtnVz853lqUA+VXgjgS9NiQFFRcosiIZmW4Vg=="],
-
-    "@deck.gl/extensions/@luma.gl/webgl": ["@luma.gl/webgl@9.3.6", "", { "dependencies": { "@math.gl/types": "^4.1.0", "@probe.gl/env": "^4.1.1" }, "peerDependencies": { "@luma.gl/core": "~9.3.0" } }, "sha512-tGm7FGWPmJKxGZMvkRPRi219x3tKmBxR7Uke09nTp2ujNak/O5V9xPIQ9lUBGTxqAb8U2yjKkXG8j+f/4b2+sw=="],
-
-    "@deck.gl/mesh-layers/@luma.gl/gltf": ["@luma.gl/gltf@9.3.6", "", { "dependencies": { "@loaders.gl/core": "~4.4.0", "@loaders.gl/gltf": "~4.4.0", "@loaders.gl/textures": "~4.4.0", "@math.gl/core": "^4.1.0" }, "peerDependencies": { "@luma.gl/core": "~9.3.0", "@luma.gl/engine": "~9.3.0", "@luma.gl/shadertools": "~9.3.0" } }, "sha512-9R27aYwvu6KBJzd9Kxs4cqIJpgJsI1AyL6Pn6+5CrmGbaCqMtgWi7Sf9Wo+bqv0PRxwzH0j1oAv7qRk0hGbstw=="],
-
-    "@deck.gl/mesh-layers/@luma.gl/shadertools": ["@luma.gl/shadertools@9.3.6", "", { "dependencies": { "@math.gl/core": "^4.1.0", "@math.gl/types": "^4.1.0" }, "peerDependencies": { "@luma.gl/core": "~9.3.0" } }, "sha512-dDuD8lCOkAE1L7hJGZEyZAi7upR1HG3wEEIQ1gCLaTTbJWC7tNtnVz853lqUA+VXgjgS9NiQFFRcosiIZmW4Vg=="],
 
     "@isaacs/cliui/string-width": ["string-width@5.1.2", "", { "dependencies": { "eastasianwidth": "^0.2.0", "emoji-regex": "^9.2.2", "strip-ansi": "^7.0.1" } }, "sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA=="],
 
