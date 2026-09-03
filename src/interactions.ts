@@ -67,13 +67,6 @@ import {TaxonsControl} from './controls/taxons'
 import * as utils from './utils'
 
 //==============================================================================
-/*
-{
-    children?: number[]
-}
-*/
-
-//==============================================================================
 
 // FUTURE
 // smallest `group` features when zoom < SHOW_DETAILS_ZOOM if there are some, otherwise smallest feature
