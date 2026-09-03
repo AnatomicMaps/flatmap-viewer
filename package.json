@@ -10,11 +10,14 @@
   "files": [
     "dist"
   ],
-  "module": "./dist/index.js",
+  "module": "dist/flatmap-viewer.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js"
-    }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/flatmap-viewer.js"
+    },
+    "./style.css": "./dist/index.css"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
