@@ -223,7 +223,7 @@ export class MinimapControl
         miniMap.resize()
         miniMap.fitBounds(this.#flatmap.bounds)
 
-        const bounds = miniMap.getBounds()
+        const bounds = miniMap.getBounds().toArray()
         this.#convertBoundsToPoints(bounds)
 
         miniMap.addSource('trackingRect', {
@@ -336,13 +336,13 @@ export class MinimapControl
     //=========================================
     {
         const source = this.#trackingRect
-        const data = source._data as unknown as GeoJSON.Feature
+        const data = source._data.geojson as GeoJSON.Feature
         const bounds = data.properties.bounds
 
-        bounds._ne.lat -= offset[1]
-        bounds._ne.lng -= offset[0]
-        bounds._sw.lat -= offset[1]
-        bounds._sw.lng -= offset[0]
+        bounds[0][0] -= offset[0]
+        bounds[0][1] -= offset[1]
+        bounds[1][0] -= offset[0]
+        bounds[1][1] -= offset[1]
 
         this.#convertBoundsToPoints(bounds)
         source.setData(data)
@@ -350,34 +350,34 @@ export class MinimapControl
         return bounds
     }
 
-    #setTrackingRectBounds(bounds: maplibregl.LngLatBounds)
-    //=====================================================
+    #setTrackingRectBounds()
+    //======================
     {
         const source = this.#trackingRect
-        const data = source._data as unknown as GeoJSON.Feature
-
+        const data = source._data.geojson as GeoJSON.Feature
+        const bounds = this.#map.getBounds().toArray()
         data.properties.bounds = bounds
         this.#convertBoundsToPoints(bounds)
         source.setData(data)
     }
 
-    #convertBoundsToPoints(bounds: maplibregl.LngLatBounds)
-    //=====================================================
+    #convertBoundsToPoints(bounds: [[number, number], [number, number]])
+    //==================================================================
     {
-        const ne = bounds._ne
-        const sw = bounds._sw
+        const sw = bounds[0]
+        const ne = bounds[1]
         const trc = this.#trackingRectCoordinates
 
-        trc[0][0][0] = ne.lng
-        trc[0][0][1] = ne.lat
-        trc[0][1][0] = sw.lng
-        trc[0][1][1] = ne.lat
-        trc[0][2][0] = sw.lng
-        trc[0][2][1] = sw.lat
-        trc[0][3][0] = ne.lng
-        trc[0][3][1] = sw.lat
-        trc[0][4][0] = ne.lng
-        trc[0][4][1] = ne.lat
+        trc[0][0][0] = ne[0]
+        trc[0][0][1] = ne[1]
+        trc[0][1][0] = sw[0]
+        trc[0][1][1] = ne[1]
+        trc[0][2][0] = sw[0]
+        trc[0][2][1] = sw[1]
+        trc[0][3][0] = ne[0]
+        trc[0][3][1] = sw[1]
+        trc[0][4][0] = ne[0]
+        trc[0][4][1] = ne[1]
     }
 
     #update()
@@ -386,10 +386,7 @@ export class MinimapControl
         if (this.#isDragging) {
             return
         }
-
-        const parentBounds = this.#map.getBounds()
-        this.#setTrackingRectBounds(parentBounds)
-
+        this.#setTrackingRectBounds()
         this.#zoomAdjust()
     }
 
