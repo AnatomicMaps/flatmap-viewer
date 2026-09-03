@@ -59,7 +59,15 @@ function zoomCountText(maxZoom: number)
         if (z > 0) {
             expr.push(z)
         }
-        expr.push(['to-string', ['at', z, ['get', 'zoom-count']]])
+        expr.push([
+            'let', 'zoom', ['at', z, ['get', 'zoom-count']],
+            [
+                'case',
+                ['<', ['var', 'zoom'], 100],
+                ['to-string', ['var', 'zoom']],
+                '99+'
+            ]
+        ])
     }
     return expr as DataDrivenPropertyValueSpecification<string>
 }
@@ -323,10 +331,10 @@ export class ClusteredAnatomicalMarkerLayer
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
                 'icon-offset': [0, -30],
-                'icon-size': markerZoomScaling(0.2),
+                'icon-size': markerZoomScaling(0.25),
                 'text-field': zoomCountText(this.#maxZoom),
-                'text-size': markerZoomScaling(10),
-                'text-offset': [0, -0.97],
+                'text-size': markerZoomScaling(7.5),
+                'text-offset': [-0.02, -1.63],
                 'text-allow-overlap': true,
                 'text-ignore-placement': true,
             },
