@@ -72,7 +72,6 @@
     "@math.gl/core": "^4.1.0",
     "@types/node": "^25.0.9",
     "@types/polylabel": "^1.1.3",
-    "eslint": "^9.19.0",
     "glob": "^10.3.12",
     "globals": "^15.14.0",
     "typedoc": "^0.28.0",
