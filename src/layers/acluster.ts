@@ -334,7 +334,7 @@ export class ClusteredAnatomicalMarkerLayer
                 'icon-size': markerZoomScaling(0.25),
                 'text-field': zoomCountText(this.#maxZoom),
                 'text-size': markerZoomScaling(7.5),
-                'text-offset': [-0.02, -1.63],
+                'text-offset': [-0.02, -1.61],
                 'text-allow-overlap': true,
                 'text-ignore-placement': true,
             },
