@@ -103,7 +103,7 @@ export function uniformZoomScaling(expression: ExpressionSpecification|number): 
             'interpolate',
             ['exponential', 2],
             ['zoom'],
-            2, ["*", ['var', 'unscaled'], ["^", 2, -2]],
+            2, ["*", ['var', 'unscaled'], ["^", 2, 1]],
             12, ["*", ['var', 'unscaled'], ["^", 2, 6]]
         ]
     ]
