@@ -2143,6 +2143,29 @@ export class FlatMap
     //==========================================================================
 
     /**
+     * Nerve cuffs are represented by multiple features sharing a ``nerveId``.
+     * Include all features with the same ``nerveId`` so the border and polygon are selected together.
+     *
+     * @param  geojsonIds  GeoJSON feature identifiers
+     * @return             The identifiers with the features of any nerves added
+     */
+    #withNerveFeatureIds(geojsonIds: GeoJSONId[]): GeoJSONId[]
+    //=========================================================
+    {
+        const featureIds: Set<number> = new Set()
+        for (const geojsonId of geojsonIds) {
+            featureIds.add(+geojsonId)
+            const annotation = this.annotation(geojsonId)
+            if (annotation && annotation.type === 'nerve' && 'nerveId' in annotation && annotation.nerveId) {
+                for (const nerveFeatureId of this.featureIdsByNerveId(annotation.nerveId as GeoJSONId)) {
+                    featureIds.add(+nerveFeatureId)
+                }
+            }
+        }
+        return [...featureIds]
+    }
+
+    /**
      * Select features on the map.
      *
      * @param  externalIds  An array of anaotomical terms identifing features to select
@@ -2151,7 +2174,7 @@ export class FlatMap
     //====================================
     {
         if (this.#userInteractions !== null) {
-            const featureIds = this.modelFeatureIdList(externalIds)
+            const featureIds = this.#withNerveFeatureIds(this.modelFeatureIdList(externalIds))
             this.#userInteractions.selectFeatures(featureIds)
         }
     }
@@ -2188,7 +2211,8 @@ export class FlatMap
     //======================================================
     {
         if (this.#userInteractions !== null) {
-            this.#userInteractions.selectFeatures(Array.isArray(geojsonIds) ? geojsonIds : [geojsonIds])
+            this.#userInteractions.selectFeatures(
+                this.#withNerveFeatureIds(Array.isArray(geojsonIds) ? geojsonIds : [geojsonIds]))
         }
     }
 
