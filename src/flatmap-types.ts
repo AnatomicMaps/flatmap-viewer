@@ -254,6 +254,7 @@ export interface FlatMapOptions
     addCloseControl?: boolean
     allControls?: boolean
     annotator?: boolean
+    attributionControl?: boolean
     background?: string
     container?: string
     debug?: boolean
