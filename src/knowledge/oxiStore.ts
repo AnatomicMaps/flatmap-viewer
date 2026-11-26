@@ -18,21 +18,31 @@ limitations under the License.
 
 ==============================================================================*/
 
-import initOxigraph from '../assets/oxigraph/web.js'
-import * as oxigraphModule from '../assets/oxigraph/web'
+// NB. Only types are imported statically. The oxigraph module (and its Wasm)
+//     are loaded dynamically by `initialise()`, which is only called
+//     when a map has RDF knowledge.
 
 import type * as $oxigraph from 'oxigraph/web'
 
-import { write as prettyTurtle } from '@jeswr/pretty-turtle'
-
 //==============================================================================
 
-export async function initialise(module_or_path?: {
+let oxigraphInit: Promise<$oxigraph.InitOutput> | null = null
+
+export function initialise(module_or_path?: {
     module_or_path: $oxigraph.InitInput | Promise<$oxigraph.InitInput>
 } | $oxigraph.InitInput | Promise<$oxigraph.InitInput>): Promise<$oxigraph.InitOutput> {
-    const wasm = await initOxigraph(module_or_path)
-    globalThis.rdfModule = oxigraphModule
-    return wasm
+    if (oxigraphInit === null) {
+        oxigraphInit = (async () => {
+            const oxigraphModule = await import('../assets/oxigraph/web.js')
+            const wasm = await oxigraphModule.default(module_or_path)
+            globalThis.rdfModule = oxigraphModule
+            return wasm
+        })().catch((error) => {
+            oxigraphInit = null
+            throw error
+        })
+    }
+    return oxigraphInit
 }
 
 export function initialised(): boolean {
@@ -230,6 +240,7 @@ export class RdfStore {
     ): Promise<string> {
         if (contentType === TurtleContentType) {
             const quads = this.#rdfStore.match(null, null, null, graph || globalThis.rdfModule.defaultGraph())
+            const { write: prettyTurtle } = await import('@jeswr/pretty-turtle')
             const turtle = await prettyTurtle(quads, {
                 format: 'text/turtle',
                 prefixes: Object.assign({ '': `${baseIri}#` }, namespaces),

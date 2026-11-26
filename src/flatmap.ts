@@ -249,7 +249,7 @@ export class FlatMap
     #normalised_size: [number, number]
     #options: MapDescriptionOptions
     #pathways: FlatMapPathways
-    #rdfStore = new $rdf.RdfStore()
+    #rdfStore: $rdf.RdfStore|null = null
     #searchIndex: SearchIndex = new SearchIndex()
     #style: FlatMapStyleSpecification
     #taxon: string|null
@@ -302,6 +302,7 @@ export class FlatMap
 
         if (mapDescription.mapKnowledge) {
             try {
+                this.#rdfStore = new $rdf.RdfStore()
                 this.#rdfStore.load(this.#url, mapDescription.mapKnowledge)
             } catch(err) {
                 console.log(err, mapDescription.mapKnowledge)
@@ -2474,7 +2475,7 @@ export class FlatMap
      * Use SPARQL to query a map's local RDF knowledge.
      */
     sparqlQuery(sparql: string, options: $rdf.QueryOptions={}): $rdf.QueryResult {
-        return this.#rdfStore.query(sparql, options)
+        return this.#rdfStore?.query(sparql, options) ?? []
     }
 
     //==========================================================================
