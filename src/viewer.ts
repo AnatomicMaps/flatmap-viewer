@@ -237,10 +237,6 @@ export class MapViewer
     async loadMap(identifier: MapIdentifier, callback: FlatMapCallback, options: FlatMapOptions={}): Promise<FlatMap|null>
     //====================================================================================================================
     {
-        // Make sure our RDF engine is initialised
-
-        await $rdf.initialise()
-
         const map = await this.findMap(identifier)
         if (map === null) {
             throw new Error(`Unknown map: ${JSON.stringify(identifier)}`)
@@ -340,11 +336,16 @@ export class MapViewer
         const mapMetadata: FlatMapMetadata|null = mapIndex?.mapMetadata
                                                || (await this.#mapServer.mapMetadata(mapId))
 
-        // Get any  RDF knowledge for the map
+        // Get any RDF knowledge for the map, only loading our RDF engine
+        // (and its Wasm) when the map has knowledge
 
-        const mapKnowledge: string|undefined = 'rdf' in mapIndex
-                                             ? (await this.#mapServer.mapKnowledge(mapId))
-                                             : undefined
+        let mapKnowledge: string|undefined
+        if ('rdf' in mapIndex) {
+            [mapKnowledge] = await Promise.all([
+                this.#mapServer.mapKnowledge(mapId),
+                $rdf.initialise()
+            ])
+        }
 
         // Set zoom range if not specified as an option
 
