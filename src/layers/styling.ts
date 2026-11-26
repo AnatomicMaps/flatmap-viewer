@@ -114,6 +114,10 @@ export function uniformZoomScaling(expression: ExpressionSpecification|number): 
 // Raster layers of detailed maps gradually show
 const DETAIL_ZOOM_OFFSET = 3
 
+// Anatomical detail images stay at this opacity until ``min-zoom + ANATOMICAL_DETAIL_FADE_OFFSET``
+const ANATOMICAL_DETAIL_FADE_OFFSET = 2
+const ANATOMICAL_DETAIL_FADE_OPACITY = 0.1
+
 //==============================================================================
 
 // MapLibre implied types
@@ -1370,13 +1374,20 @@ export class RasterStyleLayer extends StyleLayer
             style['maxzoom'] = this.#options['max-zoom']
             const fullOpacity = Math.min(this.#options['max-zoom'],
                                          this.#options['min-zoom'] + DETAIL_ZOOM_OFFSET)
+            // Anatomical detail images start before their layer's zoom level, so
+            // keep them faint until then to avoid hazing the base map
+            const fadeZoom = this.#options['min-zoom'] + ANATOMICAL_DETAIL_FADE_OFFSET
+            const opacityStops = (options.flatmapStyle === FLATMAP_STYLE.ANATOMICAL
+                               && fadeZoom < fullOpacity)   // Zoom stops must be strictly ascending
+                ? [fadeZoom, ANATOMICAL_DETAIL_FADE_OPACITY, fullOpacity, 1]
+                : [fullOpacity, 1]
             style['paint'] = {
                 'raster-opacity': [
                     'interpolate',
                     ['linear'],
                     ['zoom'],
                     this.#options['min-zoom'], 0,
-                    fullOpacity, 1
+                    ...opacityStops
                 ]
             }
         }

@@ -238,6 +238,8 @@ export class FlatMap
     #idToAnnotation: Map<GeoJSONId, FlatMapFeatureAnnotation> = new Map()
     #knowledgeSource = ''
     #map: maplibregl.Map|null = null
+    #attributionControl: maplibregl.AttributionControl|null = null
+    #showAttribution = false
     #mapLoaded = false
     #mapMetadata: FlatMapMetadata
     #mapServer: FlatMapServer
@@ -275,6 +277,7 @@ export class FlatMap
         this.#callbacks.push(mapDescription.callback)
         this.#layers = mapDescription.layers
         this.#options = mapDescription.options
+        this.#showAttribution = (this.#options.attributionControl === true)   // Hidden by default
         this.#pathways = mapDescription.pathways
         this.#style = mapDescription.style
         this.#mapTermGraph = new MapTermGraph()
@@ -431,6 +434,10 @@ export class FlatMap
 
         this.#map = new maplibregl.Map(mapOptions)
 
+        // Add attribution if wanted (any old control belonged to a map removed by a context loss)
+
+        this.#attributionControl = null
+        this.#updateAttributionControl()
 
         // Get the map's canvas element
         const canvas = this.#map.getCanvas()
@@ -522,6 +529,7 @@ export class FlatMap
             if (this.#contextLost) {
               this.callback('context-restored', undefined)
               this.#contextLost = false
+              this.#updateAttributionControl()   // In case toggled while restoring
             }
 
             this.#mapLoaded = true
@@ -1472,6 +1480,36 @@ export class FlatMap
 
         if (this.#userInteractions.minimap) {
             this.#userInteractions.minimap.setBackgroundOpacity(opacity)
+        }
+    }
+
+    /**
+     * Show and hide the map's attribution control.
+     *
+     * @param {boolean}  show  Set false to hide attribution
+     */
+    showAttribution(show: boolean)
+    //============================
+    {
+        this.#showAttribution = show
+        if (!this.#contextLost) {
+            // Otherwise applied when the map is re-created
+            this.#updateAttributionControl()
+        }
+    }
+
+    #updateAttributionControl()
+    //=========================
+    {
+        if (this.#map === null) {
+            return
+        }
+        if (this.#showAttribution && this.#attributionControl === null) {
+            this.#attributionControl = new maplibregl.AttributionControl({compact: true})
+            this.#map.addControl(this.#attributionControl)
+        } else if (!this.#showAttribution && this.#attributionControl !== null) {
+            this.#map.removeControl(this.#attributionControl)
+            this.#attributionControl = null
         }
     }
 
